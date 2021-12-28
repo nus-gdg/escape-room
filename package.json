@@ -1,0 +1,27 @@
+{
+  "name": "githubmanager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "production": "node src/index.js",
+    "importdb": "node scripts/sequalize-auto.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "discord.js": "^12.3.1",
+    "fs": "0.0.1-security",
+    "mysql2": "^1.7.0",
+    "sequelize": "^5.22.3",
+    "util": "^0.11.1"
+  },
+  "devDependencies": {
+    "mysql": "^2.18.1",
+    "nodemon": "^1.19.4",
+    "sequelize-auto": "^0.5.4"
+  }
+}

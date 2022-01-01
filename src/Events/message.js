@@ -1,9 +1,9 @@
 const runGameLogic = (client, message) => {
   if (client.variables.gameLogic.currentMessage === null) {
-	client.variables.gameLogic.currentMessage = message.id;
-	message.react("⬅️");
-	message.react("➡️");
-	message.react("❌");
+    client.variables.gameLogic.currentMessage = message.id;
+    message.react("⬅️");
+    message.react("➡️");
+    message.react("❌");
   }
   /*
   let activeMessageID = client.variables.gameLogic.currentMessage;
@@ -19,11 +19,11 @@ module.exports = (client, message) => {
   message.member.checkRoles();
   
   switch (client.variables.state) {
-	case "playing":
-	  runGameLogic(client, message);
-	  break;
-	default:
-	  break;
+    case "playing":
+      runGameLogic(client, message);
+      break;
+    default:
+      break;
   }
 
   if (message.author.bot) return;
@@ -34,15 +34,15 @@ module.exports = (client, message) => {
   if (commandHandlerCheck) return;
   
   if (!message.channel.is.escaperoom && !message.channel.is.testing) {
-	return;
+    return;
   }
 
   let cmd = client.config.prefixSeperated
     ? args[1].toLowerCase()
     : args[0].toLowerCase().substring(client.config.prefix.length);
   if (!client.commands[cmd]) {
-	message.channel.send("UwU, I don't know what " + cmd + " means :<");
-	return;
+    message.channel.send("UwU, I don't know what " + cmd + " means :<");
+    return;
   };
 
   client.commands[cmd].run(client, message, args);

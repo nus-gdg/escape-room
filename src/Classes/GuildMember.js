@@ -14,7 +14,7 @@ module.exports = GuildMember => {
 
       for (let role in config.roles) {
         if (config.roles.hasOwnProperty(role))
-          this.is[role] = this.roles.has(config.roles[role]);
+          this.is[role] = this.roles.cache.has(config.roles[role]);
       }
     }
   };

@@ -4,8 +4,10 @@
   "prefix": "nyan!",
   "prefixSeperated": true,
   "channels": {
-    "escaperoom": "925374164821479424",
-	"testing" : "742679158093643828"
+    "approved": ["853572801594916874",
+                 "742679158093643828",
+                 "928666008061882429"
+                ]
   },
   "roles": {
     "admin": "42069"

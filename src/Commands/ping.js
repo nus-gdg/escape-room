@@ -8,6 +8,6 @@ module.exports = {
   ],
 
   run: (client, message) => {
-    message.channel.send("I'm " + client.variables.state + " nya!");
+    message.channel.send("Hello nya!");
   }
 };

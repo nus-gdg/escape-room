@@ -13,8 +13,13 @@ module.exports = TextChannel => {
       this.is = {};
 
       for (let channel in config.channels) {
-        if (config.channels.hasOwnProperty(channel))
-          this.is[channel] = config.channels[channel] === this.id;
+        if (config.channels.hasOwnProperty(channel)) {
+          if (typeof config.channels[channel] === "string") {
+            this.is[channel] = config.channels[channel] === this.id;
+          } else if (Array.isArray(config.channels[channel])) {
+            this.is[channel] = config.channels[channel].includes(this.id);
+          }
+        }
       }
     }
   };

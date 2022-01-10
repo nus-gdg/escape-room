@@ -48,8 +48,15 @@ function displayLines(messages) {
 }
 
 function displayDebug(state, room) {
+  console.log("[ DEBUG ]===\n");
+
+  console.log("State:");
   console.log(state);
+
+  console.log("Room Options:");
   console.log(room.options);
+
+  console.log("\n===========\n");
 }
 
 const state = {

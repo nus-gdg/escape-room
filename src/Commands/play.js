@@ -24,7 +24,7 @@ const setupGame = async function(client, message, args) {
     message.edit(currentValue);
   }
 
-  const updateGameMessage = (client, messageReaction, user) => {
+  const updateGameMessage = function(messageReaction, user) {
     if (!user.bot) {
       if (messageId == messageReaction.message.id) {
         let hasStopped = false;
@@ -38,14 +38,14 @@ const setupGame = async function(client, message, args) {
           case "❌":
             messageReaction.message.reactions.removeAll();
             hasStopped = true;
-            client.emit("stop", messageReaction.message.channel.id);
+            this.emit("stop", messageReaction.message.channel.id);
             break;
           default:
             break;
         }
         messageReaction.users.remove(user);
         if (!hasStopped) {
-          refreshMessage(client, messageReaction.message);
+          refreshMessage(this, messageReaction.message);
         }
       }
     }
@@ -63,15 +63,11 @@ const setupGame = async function(client, message, args) {
     })*/
   }
   
-  const f1 = (messageReaction, user) => {
-    updateGameMessage(client, messageReaction, user);
-  }
-  
-  client.on("messageReactionAdd", f1);
+  client.on("messageReactionAdd", updateGameMessage);
   client.on("stop", (channelId) => {
     if (channelId === currentChannel) {
       this.channelList.splice(this.channelList.indexOf(channelId), 1);
-      client.removeListener("messageReactionAdd", f1);
+      client.removeListener("messageReactionAdd", updateGameMessage);
       client.removeListener("stop", arguments.callee);
     }
   });

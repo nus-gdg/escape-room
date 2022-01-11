@@ -7,6 +7,7 @@ const readlineInterface = readline.createInterface(process.stdin, process.stdout
 const path_data = "Levels";
 
 const msg_welcome = "Welcome!";
+const msg_win = "CONGRATULATIONS!\n\nYou have ESCAPED!";
 const msg_goodbye = "Goodbye!";
 
 const prompt_continue = "Press <ENTER> to continue...";
@@ -131,18 +132,31 @@ async function play() {
   let level = levels.level1;
   let currentState = deepcopy(level.initialState);
   let currentRoom = level.rooms[level.initialRoom];
+  let previousRoom = level.rooms[level.initialRoom];
 
   while (true) {
     clearLog();
+
+    if (currentState.escaped) {
+      displayLine(msg_win);
+      await promptContinue();
+      return;
+    }
 
     displayDebug(currentState, currentRoom);
     displayLines(currentRoom.description);
 
     const validOptions = getValidOptions(currentState, currentRoom.options);
-    let option = await promptChooseOption(currentState, validOptions);
 
-    currentRoom = level.rooms[option.destination];
-    Object.assign(currentState, currentRoom.modifies);
+    if (validOptions.length > 0) {
+      let option = await promptChooseOption(currentState, validOptions);
+      previousRoom = currentRoom;
+      currentRoom = level.rooms[option.destination];
+      Object.assign(currentState, currentRoom.modifies);
+    } else {
+      await promptContinue();
+      currentRoom = previousRoom;
+    }
   }
 }
 

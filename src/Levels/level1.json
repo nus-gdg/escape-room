@@ -4,7 +4,8 @@
     "unlockedSafe": false,
     "foundMagnet": false,
     "foundMagnetAndString": false,
-    "foundKey": false
+    "foundKey": false,
+    "escaped": false
   },
   "initialRoom": "main",
   "rooms": {
@@ -14,7 +15,8 @@
         "",
         "On the left, you see an sink.",
         "Beside it, there is a safe.",
-        "On your right, there are stairs leading to a second floor."
+        "On your right, there are stairs leading to a second floor.",
+        "In front of you is a wooden door."
       ],
       "modifies": {},
       "options": [
@@ -32,6 +34,11 @@
           "summary": "Go upstairs.",
           "destination": "main",
           "requires": {}
+        },
+        {
+          "summary": "Go to door.",
+          "destination": "door",
+          "requires": {}
         }
       ]
     },
@@ -48,7 +55,7 @@
         },
         {
           "summary": "Look under the sink.",
-          "destination": "sink_hole",
+          "destination": "sink_cabinet",
           "requires": {}
         },
         {
@@ -77,7 +84,7 @@
           "destination": "sink_hole_unplugged",
           "requires": {
             "foundKey": false,
-            "foundMagnetAndString": true
+            "foundString": true
           }
         },
         {
@@ -89,16 +96,10 @@
     },
     "sink_hole_plugged": {
       "description": [
-        "There seems to be something shiny peeking out of the dark hole and out of your reach."
+        "There seems to be something shiny peeking out of the dark hole that is out of your hands' reach."
       ],
       "modifies": {},
-      "options": [
-        {
-          "summary": "Continue.",
-          "destination": "sink_hole",
-          "requires": {}
-        }
-      ]
+      "options": []
     },
     "sink_hole_unplugged": {
       "description": [
@@ -107,13 +108,87 @@
       "modifies": {
         "foundKey": true
       },
+      "options": []
+    },
+    "sink_cabinet": {
+      "description": [
+        "Below the sink is a cabinet.",
+        "",
+        "You open it to find the drain pipes covered in black mould.",
+        "A piece of string secures a broken pipe connection.",
+        "",
+        "Behind the pipes, the letters 'ESC' are scratched vaguely on the cabinet walls."
+      ],
+      "modifies": {},
       "options": [
         {
-          "summary": "Continue.",
-          "destination": "sink_hole",
+          "summary": "Remove string.",
+          "destination": "unlock_string",
+          "requires": {
+            "foundString": false
+          }
+        },
+        {
+          "summary": "Back.",
+          "destination": "sink",
           "requires": {}
         }
       ]
+    },
+    "door": {
+      "description": [
+        "You approach the wooden door."
+      ],
+      "modifies": {},
+      "options": [
+        {
+          "summary": "Open door",
+          "destination": "door_locked",
+          "requires": {}
+        },
+        {
+          "summary": "Unlock door.",
+          "destination": "door_unlocked",
+          "requires": {
+            "foundKey": true
+          }
+        },
+        {
+          "summary": "Back.",
+          "destination": "main",
+          "requires": {}
+        }
+      ]
+    },
+    "door_locked": {
+      "description": [
+        "You turn the brass knob on the door, but it doesn't budge.",
+        "It looks like it needs a key to be unlocked."
+      ],
+      "modifies": {},
+      "options": []
+    },
+    "door_unlocked": {
+      "description": [
+        "The key fits into the door's keyhole.",
+        "",
+        "You twist the key and the door unlocks."
+      ],
+      "modifies": {
+        "escaped": true
+      },
+      "options": []
+    },
+    "unlock_string": {
+      "description": [
+        "Obtained a piece of string.",
+        "",
+        "<You can now TIE objects>"
+      ],
+      "modifies": {
+        "foundString": true
+      },
+      "options": []
     }
   }
 }

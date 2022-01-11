@@ -11,8 +11,13 @@ readlineInterface.on("SIGINT", () => {
 
 const path_data = "Levels";
 
+const msg_line = "*".repeat(10);
 const msg_welcome = "Welcome!";
-const msg_win = "CONGRATULATIONS!\n\nYou have ESCAPED!";
+const msg_win = [
+  "CONGRATULATIONS!",
+  "",
+  "You have ESCAPED!"
+];
 const msg_goodbye = "Goodbye!";
 const msg_continue = "Press <ENTER> to continue...";
 const msg_chooseOption = "What would you like to do?";
@@ -53,25 +58,6 @@ function formatAsMenu(options, header = "") {
   return menu;
 }
 
-function ask(query = "", ) {
-  return new Promise((resolve, reject) => {
-    readlineInterface.question(query, (input) => {
-      resolve(input);
-    });
-  });
-  readlineInterface.question(query, (input) => {
-    resolve(input);
-  });
-}
-
-function clearLog() {
-  console.clear();
-}
-
-function displayLine(message) {
-  console.log(message);
-}
-
 function display(value) {
   if (Array.isArray(value)) {
     console.log(value.join('\n'));
@@ -80,20 +66,14 @@ function display(value) {
   }
 }
 
-function clearDisplay() {
+function clear() {
   console.clear();
 }
 
-function displayDebug(state, room) {
-  console.log("[ DEBUG ]===\n");
-
-  console.log("State:");
-  console.log(state);
-
-  console.log("Room Options:");
-  console.log(room.options);
-
-  console.log("\n===========\n");
+function debug(value, header = "") {
+  console.log(header);
+  console.dir(value, { "depth": null });
+  console.log(msg_line);
 }
 
 let levels = {};
@@ -149,20 +129,20 @@ async function promptChooseOption(state, options) {
 }
 
 async function setup() {
-  clearLog();
+  clear();
 
   await Promise.all([
     loadLevels(),
   ]);
 
-  displayLine(msg_welcome);
+  display(msg_welcome);
 
   await promptContinue();
 }
 
 async function teardown() {
-  clearLog();
-  displayLine(msg_goodbye);
+  clear();
+  display(msg_goodbye);
 }
 
 async function play() {
@@ -172,7 +152,7 @@ async function play() {
   let previousRoom = level.rooms[level.initialRoom];
 
   while (true) {
-    clearLog();
+    clear();
 
     if (currentState.escaped) {
       display(msg_win);
@@ -180,7 +160,9 @@ async function play() {
       return;
     }
 
-    displayDebug(currentState, currentRoom);
+    debug(currentState, "STATE");
+    debug(currentRoom, "ROOM");
+
     display(currentRoom.description);
 
     const validOptions = getValidOptions(currentState, currentRoom.options);

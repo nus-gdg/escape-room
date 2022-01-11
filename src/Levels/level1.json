@@ -1,0 +1,194 @@
+{
+  "initialState": {
+    "foundString": false,
+    "unlockedSafe": false,
+    "foundMagnet": false,
+    "foundMagnetAndString": false,
+    "foundKey": false,
+    "escaped": false
+  },
+  "initialRoom": "main",
+  "rooms": {
+    "main": {
+      "description": [
+        "You are trapped...",
+        "",
+        "On the left, you see an sink.",
+        "Beside it, there is a safe.",
+        "On your right, there are stairs leading to a second floor.",
+        "In front of you is a wooden door."
+      ],
+      "modifies": {},
+      "options": [
+        {
+          "summary": "Go to sink.",
+          "destination": "sink",
+          "requires": {}
+        },
+        {
+          "summary": "Go to safe.",
+          "destination": "main",
+          "requires": {}
+        },
+        {
+          "summary": "Go upstairs.",
+          "destination": "main",
+          "requires": {}
+        },
+        {
+          "summary": "Go to door.",
+          "destination": "door",
+          "requires": {}
+        }
+      ]
+    },
+    "sink": {
+      "description": [
+        "You approach the small sink squeezed in a corner of the room."
+      ],
+      "modifies": {},
+      "options": [
+        {
+          "summary": "Look inside the sink.",
+          "destination": "sink_hole",
+          "requires": {}
+        },
+        {
+          "summary": "Look under the sink.",
+          "destination": "sink_cabinet",
+          "requires": {}
+        },
+        {
+          "summary": "Back.",
+          "destination": "main",
+          "requires": {}
+        }
+      ]
+    },
+    "sink_hole": {
+      "description": [
+        "Water drips from the sink tap like a clock,",
+        "chiming as the droplets spatter on the metallic surface."
+      ],
+      "modifies": {},
+      "options": [
+        {
+          "summary": "Inspect sink hole.",
+          "destination": "sink_hole_plugged",
+          "requires": {
+            "foundKey": false
+          }
+        },
+        {
+          "summary": "Unplug sink hole.",
+          "destination": "sink_hole_unplugged",
+          "requires": {
+            "foundKey": false,
+            "foundString": true
+          }
+        },
+        {
+          "summary": "Back.",
+          "destination": "sink",
+          "requires": {}
+        }
+      ]
+    },
+    "sink_hole_plugged": {
+      "description": [
+        "There seems to be something shiny peeking out of the dark hole that is out of your hands' reach."
+      ],
+      "modifies": {},
+      "options": []
+    },
+    "sink_hole_unplugged": {
+      "description": [
+        "You retrieve a tiny key from the sink hole."
+      ],
+      "modifies": {
+        "foundKey": true
+      },
+      "options": []
+    },
+    "sink_cabinet": {
+      "description": [
+        "Below the sink is a cabinet.",
+        "",
+        "You open it to find the drain pipes covered in black mould.",
+        "A piece of string secures a broken pipe connection.",
+        "",
+        "Behind the pipes, the letters 'ESC' are scratched vaguely on the cabinet walls."
+      ],
+      "modifies": {},
+      "options": [
+        {
+          "summary": "Remove string.",
+          "destination": "unlock_string",
+          "requires": {
+            "foundString": false
+          }
+        },
+        {
+          "summary": "Back.",
+          "destination": "sink",
+          "requires": {}
+        }
+      ]
+    },
+    "door": {
+      "description": [
+        "You approach the wooden door."
+      ],
+      "modifies": {},
+      "options": [
+        {
+          "summary": "Open door",
+          "destination": "door_locked",
+          "requires": {}
+        },
+        {
+          "summary": "Unlock door.",
+          "destination": "door_unlocked",
+          "requires": {
+            "foundKey": true
+          }
+        },
+        {
+          "summary": "Back.",
+          "destination": "main",
+          "requires": {}
+        }
+      ]
+    },
+    "door_locked": {
+      "description": [
+        "You turn the brass knob on the door, but it doesn't budge.",
+        "It looks like it needs a key to be unlocked."
+      ],
+      "modifies": {},
+      "options": []
+    },
+    "door_unlocked": {
+      "description": [
+        "The key fits into the door's keyhole.",
+        "",
+        "You twist the key and the door unlocks."
+      ],
+      "modifies": {
+        "escaped": true
+      },
+      "options": []
+    },
+    "unlock_string": {
+      "description": [
+        "Obtained a piece of string.",
+        "",
+        "<You can now TIE objects>"
+      ],
+      "modifies": {
+        "foundString": true
+      },
+      "options": []
+    }
+  }
+}

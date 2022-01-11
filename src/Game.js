@@ -1,11 +1,25 @@
+"use strict";
+const fs = require('fs');
+const path = require('path');
 const readline = require('readline');
 const readlineInterface = readline.createInterface(process.stdin, process.stdout);
+
+const path_data = "Levels";
 
 const msg_welcome = "Welcome!";
 const msg_goodbye = "Goodbye!";
 
 const prompt_continue = "Press <ENTER> to continue...";
 const prompt_chooseOption = "What would you like to do?";
+
+function readDataSync(directory, onFileContent) {
+  fs.readdirSync(directory).forEach((filename) => {
+      const fileInfo = path.parse(filename);
+      const filepath = path.resolve(directory, filename);
+      const rawdata = fs.readFileSync(filepath);
+      onFileContent(fileInfo.name, fileInfo.ext, rawdata);
+  })
+}
 
 function deepcopy(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -59,122 +73,13 @@ function displayDebug(state, room) {
   console.log("\n===========\n");
 }
 
-const state = {
-  "foundString": false,
-  "unlockedSafe": false,
-  "foundMagnet": false,
-  "foundMagnetAndString": false,
-  "foundKey": false,
-}
+let levels = {};
 
-const rooms = {
-  "main": {
-    "description": [
-      "You are trapped...",
-      "",
-      "On the left, you see an sink.",
-      "Beside it, there is a safe.",
-      "On your right, there are stairs leading to a second floor.",
-    ],
-    "modifies": {},
-    "options": [
-      {
-        "summary": "Go to sink.",
-        "destination": "sink",
-        "requires": {},
-      },
-      {
-        "summary": "Go to safe.",
-        "destination": "main",
-        "requires": {},
-      },
-      {
-        "summary": "Go upstairs.",
-        "destination": "main",
-        "requires": {},
-      },
-    ],
-  },
-  "sink": {
-    "description": [
-      "You approach the small sink squeezed in a corner of the room."
-    ],
-    "modifies": {},
-    "options": [
-      {
-        "summary": "Look inside the sink.",
-        "destination": "sink_hole",
-        "requires": {},
-      },
-      {
-        "summary": "Look under the sink.",
-        "destination": "sink_hole",
-        "requires": {},
-      },
-      {
-        "summary": "Back.",
-        "destination": "main",
-        "requires": {},
-      },
-    ],
-  },
-  "sink_hole": {
-    "description": [
-      "Water drips from the sink tap like a clock,",
-      "chiming as the droplets spatter on the metallic surface."
-    ],
-    "modifies": {},
-    "options": [
-      {
-        "summary": "Inspect sink hole.",
-        "destination": "sink_hole_plugged",
-        "requires": {
-          "foundKey": false,
-        },
-      },
-      {
-        "summary": "Unplug sink hole.",
-        "destination": "sink_hole_unplugged",
-        "requires": {
-          "foundKey": false,
-          "foundMagnetAndString": true,
-        },
-      },
-      {
-        "summary": "Back.",
-        "destination": "sink",
-        "requires": {},
-      },
-    ],
-  },
-  "sink_hole_plugged": {
-    "description": [
-      "There seems to be something shiny peeking out of the dark hole and out of your reach."
-    ],
-    "modifies": {},
-    "options": [
-      {
-        "summary": "Continue.",
-        "destination": "sink_hole",
-        "requires": {},
-      },
-    ],
-  },
-  "sink_hole_unplugged": {
-    "description": [
-      "You retrieve a tiny key from the sink hole.",
-    ],
-    "modifies": {
-      "foundKey": true,
-    },
-    "options": [
-      {
-        "summary": "Continue.",
-        "destination": "sink_hole",
-        "requires": {},
-      },
-    ],
-  },
+function loadLevels() {
+  levels = {};
+  readDataSync(path_data, (name, ext, rawdata) => {
+    levels[name] = JSON.parse(rawdata);
+  });
 }
 
 function hasRequirements(state, requires) {
@@ -210,6 +115,9 @@ function promptChooseOption(state, options) {
 
 async function setup() {
   clearLog();
+
+  loadLevels();
+
   displayLine(msg_welcome);
   await promptContinue();
 }
@@ -220,8 +128,9 @@ async function teardown() {
 }
 
 async function play() {
-  let currentState = deepcopy(state);
-  let currentRoom = rooms["main"];
+  let level = levels.level1;
+  let currentState = deepcopy(level.initialState);
+  let currentRoom = level.rooms[level.initialRoom];
 
   while (true) {
     clearLog();
@@ -232,7 +141,7 @@ async function play() {
     const validOptions = getValidOptions(currentState, currentRoom.options);
     let option = await promptChooseOption(currentState, validOptions);
 
-    currentRoom = rooms[option.destination];
+    currentRoom = level.rooms[option.destination];
     Object.assign(currentState, currentRoom.modifies);
   }
 }

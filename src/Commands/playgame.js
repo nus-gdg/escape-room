@@ -1,18 +1,17 @@
 // In JavaScript, classes are closures. Thus, setupGame 
 // can be seen as a class. 
-const setupGame = (client, message, args) => {
-  if (typeof client.variables.channelList.play === "undefined") {
-    client.variables.channelList.play = [];
+const setupGame2 = (client, message, args) => {
+  if (typeof client.variables.channelList.playgame === "undefined") {
+    client.variables.channelList.playgame = [];
   }
   
-  if (client.variables.channelList.play.includes(message.channel.id)) {
+  if (client.variables.channelList.playgame.includes(message.channel.id)) {
     message.channel.send("This channel is taken nya!");
     return;
   }
-  client.variables.channelList.play.push(message.channel.id);
-  console.log(client.variables.channelList);
+  client.variables.channelList.playgame.push(message.channel.id);
   
-  let currentValue = 0;
+  let currentValue = 5;
   let messageId = null;
   let currentChannel = message.channel.id;
   message.channel.send(currentValue).then((sent) => {
@@ -39,7 +38,7 @@ const setupGame = (client, message, args) => {
           case "❌":
             messageReaction.message.reactions.removeAll();
             hasStopped = true;
-            this.emit("stop", messageReaction.message.channel.id, "play");
+            this.emit("stop", messageReaction.message.channel.id, "playgame");
             break;
           default:
             break;
@@ -66,9 +65,9 @@ const setupGame = (client, message, args) => {
   
   client.on("messageReactionAdd", updateGameMessage);
   client.on("stop", (channelId, module) => {
-    if ((channelId === currentChannel) && (module === "play")) {
-      client.variables.channelList.play.splice(
-        client.variables.channelList.play.indexOf(channelId), 1);
+    if ((channelId === currentChannel) && (module === "playgame")) {
+      client.variables.channelList.playgame.splice(
+        client.variables.channelList.playgame.indexOf(channelId), 1);
       client.removeListener("messageReactionAdd", updateGameMessage);
       client.removeListener("stop", arguments.callee);
     }
@@ -78,13 +77,13 @@ const setupGame = (client, message, args) => {
 module.exports = {
   commands: [
     {
-      command: "play",
-      example: "nyan! play",
-      description: "Plays a test game."
+      command: "playgame",
+      example: "nyan! playgame",
+      description: "Starts up the escape room game."
     }
   ],
 
   run: (client, message, args) => {
-    setupGame(client, message, args);
+    setupGame2(client, message, args);
   }
 };

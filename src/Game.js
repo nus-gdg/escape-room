@@ -9,6 +9,10 @@ readlineInterface.on("SIGINT", () => {
   process.exit();
 });
 
+const flags = {
+  "debug": "-d",
+};
+
 const path_data = "Levels";
 
 const msg_line = "*".repeat(10);
@@ -146,6 +150,8 @@ async function teardown() {
 }
 
 async function play() {
+  let isDebug = process.argv[2] === flags.debug;
+
   let level = levels.level1;
   let currentState = deepcopy(level.initialState);
   let currentRoom = level.rooms[level.initialRoom];
@@ -160,8 +166,10 @@ async function play() {
       return;
     }
 
-    debug(currentState, "STATE");
-    debug(currentRoom, "ROOM");
+    if (isDebug) {
+      debug(currentState, "STATE");
+      debug(currentRoom, "ROOM");
+    }
 
     display(currentRoom.description);
 

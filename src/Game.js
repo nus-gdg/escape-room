@@ -3,15 +3,20 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 const readlineInterface = readline.createInterface(process.stdin, process.stdout);
+const input = readlineInterface[Symbol.asyncIterator]();
+
+readlineInterface.on("SIGINT", () => {
+  process.exit();
+});
 
 const path_data = "Levels";
 
 const msg_welcome = "Welcome!";
 const msg_win = "CONGRATULATIONS!\n\nYou have ESCAPED!";
 const msg_goodbye = "Goodbye!";
-
-const prompt_continue = "Press <ENTER> to continue...";
-const prompt_chooseOption = "What would you like to do?";
+const msg_continue = "Press <ENTER> to continue...";
+const msg_chooseOption = "What would you like to do?";
+const msg_invalidOption = "Nothing interesting happens...";
 
 function readDataSync(directory, onFileContent) {
   fs.readdirSync(directory).forEach((filename) => {
@@ -30,11 +35,15 @@ function equals(obj1, obj2) {
   return JSON.stringify(obj1) === JSON.stringify(obj2);
 }
 
-function formatWithPadding(message) {
-  return `\n${message}\n`;
+function formatWithPadding(value) {
+  return [
+    "",
+    value,
+    "",
+  ];
 }
 
-function formatAsMenu(options, header = prompt_chooseOption) {
+function formatAsMenu(options, header = "") {
   let menu = header;
 
   for (const [i, option] of Object.entries(options)) {
@@ -44,9 +53,14 @@ function formatAsMenu(options, header = prompt_chooseOption) {
   return menu;
 }
 
-function ask(query = "") {
+function ask(query = "", ) {
   return new Promise((resolve, reject) => {
-    readlineInterface.question(query, resolve);
+    readlineInterface.question(query, (input) => {
+      resolve(input);
+    });
+  });
+  readlineInterface.question(query, (input) => {
+    resolve(input);
   });
 }
 
@@ -58,8 +72,16 @@ function displayLine(message) {
   console.log(message);
 }
 
-function displayLines(messages) {
-  console.log(messages.join('\n'));
+function display(value) {
+  if (Array.isArray(value)) {
+    console.log(value.join('\n'));
+  } else {
+    console.log(value);
+  }
+}
+
+function clearDisplay() {
+  console.clear();
 }
 
 function displayDebug(state, room) {
@@ -76,7 +98,7 @@ function displayDebug(state, room) {
 
 let levels = {};
 
-function loadLevels() {
+async function loadLevels() {
   levels = {};
   readDataSync(path_data, (name, ext, rawdata) => {
     levels[name] = JSON.parse(rawdata);
@@ -103,23 +125,38 @@ function getValidOptions(state, options) {
   return validOptions;
 }
 
-function promptContinue() {
-  return ask(formatWithPadding(prompt_continue));
+async function promptContinue() {
+  display(formatWithPadding(msg_continue));
+  await input.next();
 }
 
-function promptChooseOption(state, options) {
-  return ask(formatWithPadding(formatAsMenu(options)))
-    .then((optionIndex) => {
-      return options[optionIndex - 1];
-    });
+async function promptChooseOption(state, options) {
+  while (true) {
+    display(
+      formatWithPadding(
+        formatAsMenu(options, msg_chooseOption)));
+
+    let answer = await input.next();
+    let index = answer.value - 1;
+
+    if (options.hasOwnProperty(index)) {
+      return options[index];
+    } else {
+      display(
+        formatWithPadding(msg_invalidOption));
+    }
+  }
 }
 
 async function setup() {
   clearLog();
 
-  loadLevels();
+  await Promise.all([
+    loadLevels(),
+  ]);
 
   displayLine(msg_welcome);
+
   await promptContinue();
 }
 
@@ -138,13 +175,13 @@ async function play() {
     clearLog();
 
     if (currentState.escaped) {
-      displayLine(msg_win);
+      display(msg_win);
       await promptContinue();
       return;
     }
 
     displayDebug(currentState, currentRoom);
-    displayLines(currentRoom.description);
+    display(currentRoom.description);
 
     const validOptions = getValidOptions(currentState, currentRoom.options);
 
@@ -153,6 +190,7 @@ async function play() {
       previousRoom = currentRoom;
       currentRoom = level.rooms[option.destination];
       Object.assign(currentState, currentRoom.modifies);
+
     } else {
       await promptContinue();
       currentRoom = previousRoom;

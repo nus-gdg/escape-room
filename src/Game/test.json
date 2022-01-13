@@ -1,0 +1,638 @@
+{
+	"rooms": {
+		"downstairsRoom": {
+			"initialFlags": {
+				"frontDoorLocked": true,
+				"cabinetOpen": false,
+				"yarnTaken": false,
+				"ironKeyTaken": false
+			},
+			"look around": [
+				{
+					"content": {
+						"text": "Here is the downstairs room. The rooms's only furnishings are a plain wooden <b>cabinet</b> and a <b>sink</b> on the western wall. The front <b>door</b> is closed. There appears to be a flight of <b>stairs</b> leading to the second floor.",
+						"image": [
+							"https://i.imgur.com/bK1EivR.jpeg"
+						]
+					}
+				},
+				{
+					"condition": {
+						"frontDoorOpen": false
+					},
+					"content": {
+						"text": "The front <b>door</b> is closed."
+					},
+					"altContent": {
+						"text": "The front <b>door</b> is open."
+					}
+				},
+				{
+					"content": {
+						"text": "There appears to be a flight of <b>stairs</b> leading to the second floor."
+					}
+				}
+			],
+			"interactables": {
+				"cabinet": {
+					"look at": [
+						{
+							"content": {
+								"text": "The plain wooden cabinet stares back into your soul. It might be hiding something from you.",
+								"image": [
+										"https://i.imgur.com/n1EFHbE.jpeg"
+								]
+							}
+						},
+						{
+							"condition": {
+								"cabinetOpen": true,
+								"yarnTaken": false
+							},
+							"content": {
+								"text": "The doors of the cabinet are open, you spot a pile of yarn in the cabinet. Perhaps it was hiding this from you."
+							}
+						}
+					],
+					"open": [
+						{
+							"condition": {
+								"cabinetOpen": true
+							},
+							"content": {
+								"text": "The cabinet is already open."
+							},
+							"altContent": {
+								"text": "You open the squeaky cabinet doors.",
+								"setFlag": [
+									"cabinetOpen"
+								],
+								"addContent": "look at cabinet"
+							}
+						}
+					],
+					"close": [
+						{
+							"condition": {
+								"cabinetOpen": true
+							},
+							"content": {
+								"text": "You close the cabinet doors.",
+								"unsetFlag": [
+									"cabinetOpen"
+								]
+							},
+							"altContent": {
+								"text": "The cabinet is already closed."
+							}
+						}
+					]
+				},
+				"yarn": {
+					"take": [
+						{
+							"condition": {
+								"cabinetOpen": true,
+								"yarnTaken": false
+							},
+							"content": {
+								"text": "You take the pile of yarn.",
+								"setFlag": [
+									"yarnTaken"
+								],
+								"addInventory": [
+									"yarn"
+								]
+							}
+						}
+					]
+				},
+				"sink": {
+					"look at": [
+						{
+							"content": {
+								"text": "The sink is rusted and beyond disrepair."
+							}
+						},
+						{
+							"condition": {
+								"ironKeyTaken": false
+							},
+							"content": {
+								"text": "You see a faint glint coming from the sink drain."
+							}
+						}
+					],
+					"look under": [
+						{
+							"content": {
+								"text": "\"19\" seems to be written under the sink. Upon closer inspection, the second half of the message seems to be rubbed out."
+							}
+						}
+					],
+					"magnet on a string": [
+						{
+							"condition": {
+								"ironKeyTaken": false
+							},
+							"content": {
+								"text": "You carefully fish out the object that was occasionally glinting. It was a iron key! As you were picking up the key, you accidentally dropped the magnet on a string down the sink hole. How unfortunate.",
+								"setFlag": [
+									"ironKeyTaken"
+								],
+								"removeInventory": [
+									"magnet on a string"
+								],
+								"addInventory": [
+									"iron key"
+								]
+							}
+						}
+					]
+				},
+				"door": {
+					"look at": [
+						{
+							"condition": {
+								"frontDoorLocked": true
+							},
+							"content": {
+								"text": "The door appears to be locked. There is probably a key somewhere around here."
+							},
+							"altContent": {
+								"text": "The door appears to be unlocked."
+							}
+						}
+					],
+					"iron key": [
+						{
+							"condition": {
+								"frontDoorLocked": true
+							},
+							"content": {
+								"text": "You unlocked the door with the key.",
+								"unsetFlag": [
+									"frontDoorLocked"
+								]
+							},
+							"altContent": {
+								"text": "You close the door and lock the door with the key.",
+								"setFlag": [
+									"frontDoorLocked"
+								]
+							}
+						}
+					]
+				},
+				"stairs": {
+					"look at": [
+						{
+							"content": {
+								"text": "The flight of stairs lead upstairs."
+							}
+						}
+					],
+					"use": [
+						{
+							"content": {
+								"text": "You go up the flight of stairs.",
+								"changeRoom": "upstairsRoom",
+								"addContent": "look around"
+							}
+						}
+					]
+				},
+				"upstairs": {
+					"go to": [
+						{
+							"content": {
+								"text": "You go up the flight of stairs.",
+								"changeRoom": "upstairsRoom",
+								"addContent": "look around"
+							}
+						}
+					]
+				}
+			}
+		},
+		"upstairsRoom": {
+			"initialFlags": {
+				"safeLocked": true,
+				"magnetTaken": false
+			},
+			"look around": [
+				{
+					"content": {
+						"text": "Here is the upstairs room. The room is only decorated with a bare <b>bed</b> and a small <b>safe</b> in the corner of the room. Additionally, there is the flight of <b>stairs</b> you just came up from."
+					}
+				}
+			],
+			"interactables": {
+				"bed": {
+					"look at": [
+						{
+							"content": {
+								"text": "The bed is neither too hard nor too soft. If a little girl were to stumble upon this bed in the woods, it would be just right."
+							}
+						}
+					],
+					"look under": [
+						{
+							"content": {
+								"text": "There appears to be a message hastily scribbled on the bedframe in red. The message reads \"84\". The first half of the message seems to be blotted out with more red paint."
+							}
+						}
+					]
+				},
+				"safe": {
+					"look at": [
+						{
+							"condition": {
+								"safeLocked": true
+							},
+							"content": {
+								"text": "The safe is locked. It seems that the safe is locked with a 4 digit code."
+							},
+							"altContent": {
+								"text": "The safe is unlocked."
+							}
+						},
+						{
+							"condition": {
+								"safeLocked": false,
+								"magnetTaken": false
+							},
+							"content": {
+								"text": "There appears to be a single ring <b>magnet</b> in the safe."
+							}
+						}
+					],
+					"1984": [
+						{
+							"condition": {
+								"safeLocked": true
+							},
+							"content": {
+								"text": "You input \"1984\" into the safe and you hear a loud click.",
+								"unsetFlag": [
+									"safeLocked"
+								],
+								"addContent": "look at safe"
+							},
+							"altContent": {
+								"text": "You have already unlocked the safe, entering the code again won't unlock a secret drawer in the safe."
+							}
+						}
+					]
+				},
+				"magnet": {
+					"take": [
+						{
+							"condition": {
+								"safeLocked": false,
+								"magnetTaken": false
+							},
+							"content": {
+								"text": "You take the ring magnet.",
+								"setFlag": [
+									"magnetTaken"
+								],
+								"addInventory": [
+									"magnet"
+								]
+							}
+						}
+					],
+					"1984": [
+						{
+							"condition": {
+								"safeLocked": true
+							},
+							"content": {
+								"text": "You input \"1984\" into the safe and you hear a loud click.",
+								"unsetFlag": [
+									"safeLocked"
+								],
+								"addContent": "look at safe"
+							},
+							"altContent": {
+								"text": "You have already unlocked the safe, entering the code again won't unlock a secret drawer in the safe."
+							}
+						}
+					]
+				},
+				"stairs": {
+					"look at": [
+						{
+							"content": {
+								"text": "The flight of stairs lead back downstairs."
+							}
+						}
+					],
+					"use": [
+						{
+							"content": {
+								"text": "You go down the flight of stairs.",
+								"changeRoom": "downstairsRoom",
+								"addContent": "look around"
+							}
+						}
+					]
+				},
+				"downstairs": {
+					"go to": [
+						{
+							"content": {
+								"text": "You go down the flight of stairs.",
+								"changeRoom": "downstairsRoom",
+								"addContent": "look around"
+							}
+						}
+					]
+				}
+			}
+		}
+	},
+	"items": {
+		"magnet": {
+			"look at": [
+				{
+					"content": {
+						"text": "The ring magnet fits snugly around your finger. You could possibly lose this down a drain pipe."
+					}
+				}
+			],
+			"yarn": [
+				{
+					"condition": {
+						"magnet": true
+					},
+					"content": {
+						"text": "You carefully thread the yarn around the magnet, making a magnet on a string.",
+						"removeInventory": [
+							"yarn",
+							"magnet"
+						],
+						"addInventory": [
+							"magnet on a string"
+						]
+					}
+				}
+			]
+		},
+		"yarn": {
+			"look at": [
+				{
+					"content": {
+						"text": "Some yarn that was probably used to knit some ugly sweater, definitely not used in senario testing or something."
+					}
+				}
+			],
+			"magnet": [
+				{
+					"condition": {
+						"yarn": true
+					},
+					"content": {
+						"text": "You carefully thread the yarn around the magnet, making a magnet on a string.",
+						"removeInventory": [
+							"yarn",
+							"magnet"
+						],
+						"addInventory": [
+							"magnet on a string"
+						]
+					}
+				}
+			]
+		},
+		"magnet on a string": {
+			"look at": [
+				{
+					"content": {
+						"text": "You tied a magnet to a piece of yarn. You can probably catch some magnetic fish with this, if they exist."
+					}
+				}
+			]
+		}
+	},
+	"verbs": [
+		{
+			"name": "help",
+			"desc": "help",
+			"regex": "help",
+			"example": "HELP",
+			"usage": "List verbs you can use.",
+			"ignoreVerifyActor": true
+		},
+		{
+			"name": "list verbs",
+			"desc": "list verbs",
+			"regex": "list verbs",
+			"example": "LIST VERBS",
+			"usage": "List verbs you can use.",
+			"ignoreVerifyActor": true
+		},
+		{
+			"name": "inventory",
+			"desc": "inventory",
+			"regex": "inventory",
+			"example": "INVENTORY",
+			"usage": "Check your inventory.",
+			"ignoreVerifyActor": true
+		},
+		{
+			"name": "look around",
+			"desc": "look around",
+			"regex": "look around",
+			"example": "LOOK AROUND",
+			"usage": "Look around the current room.",
+			"map": {
+				"actor": "verb"
+			}
+		},
+		{
+			"name": "look at",
+			"desc": "look at _",
+			"default": [{
+				"content": {
+					"text": "You dont see anything resembling anything like it."
+				}
+			}],
+			"regex": "look at (.+)",
+			"example": "LOOK AT potato",
+			"usage": "Look closely at the object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "look under",
+			"desc": "look under _",
+			"default": [{
+				"content": {
+					"text": "There is nothing interesting there."
+				}
+			}],
+			"regex": "look under (.+)",
+			"example": "LOOK UNDER potato",
+			"usage": "Look under the object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "look behind",
+			"desc": "look behind _",
+			"default": [{
+				"content": {
+					"text": "There is nothing interesting there."
+				}
+			}],
+			"regex": "look behind (.+)",
+			"example": "LOOK BEHIND potato",
+			"usage": "Look behind the object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "look above",
+			"desc": "look above _",
+			"default": [{
+				"content": {
+					"text": "There is nothing interesting there."
+				}
+			}],
+			"regex": "look above (.+)",
+			"example": "LOOK ABOVE potato",
+			"usage": "Look above the object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "take",
+			"desc": "take _",
+			"default": [{
+				"content": {
+					"text": "You can't do that. Perhaps you're trying to take an item that doesn't exist or have already taken, or perhaps just you can't take {0}."
+				}
+			}],
+			"regex": "take (.+)",
+			"example": "TAKE potato",
+			"usage": "Take the object, putting it in your inventory.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "use",
+			"desc": "use _ on _",
+			"default": [{
+				"content": {
+					"text": "Your request to use something, presumably on something else, made no sense to me. Perhaps you're trying to use an item you don't have, or use an item on a target that doesn't exist, or perhaps those objects simply aren't intended to interact in that way."
+				}
+			}],
+			"regex": "use (.+) on (.+)",
+			"example": "USE potato ON Irish",
+			"usage": "Use the object on its own or on another object.",
+			"map": {
+				"actor": 1,
+				"actee": 2
+			}
+		},
+		{
+			"name": "use",
+			"desc": "use _",
+			"default": [{
+				"content": {
+					"text": "Your request to use something, presumably on something else, made no sense to me. Perhaps you're trying to use an item you don't have, or use an item on a target that doesn't exist, or perhaps those objects simply aren't intended to interact in that way."
+				}
+			}],
+			"regex": "/use (.+)/",
+			"example": "USE potato",
+			"usage": "Use the object on its own or on another object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "enter",
+			"desc": "enter _ into _",
+			"default": [{
+				"content": {
+					"text": "You enter the code, but nothing happens."
+				}
+			}],
+			"regex": "enter (.+) into (.+)",
+			"example": "ENTER 12345678 INTO computer",
+			"usage": "Enter codes or passwords into code or password receptacles.",
+			"map": {
+				"actor": 1,
+				"actee": 2
+			},
+			"ignoreVerifyActor": true
+		},
+		{
+			"name": "go to",
+			"desc": "go to _",
+			"default": [{
+				"content": {
+					"text": "You don't know where it is, hence you can't go there."
+				}
+			}],
+			"regex": "go to (.+)",
+			"example": "GO TO kitchen",
+			"usage": "Go to the location.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "open",
+			"desc": "open _",
+			"default": [{
+				"content": {
+					"text": "You don't know how to open it. Can it even be opened?"
+				}
+			}],
+			"regex": "open (.+)",
+			"example": "OPEN box",
+			"usage": "Open the object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		},
+		{
+			"name": "close",
+			"desc": "close _",
+			"default": [{
+				"content": {
+					"text": "You don't know how to close it. Can it even be closed?"
+				}
+			}],
+			"regex": "close (.+)",
+			"example": "CLOSE box",
+			"usage": "Close the object.",
+			"map": {
+				"actor": "verb",
+				"actee": 1
+			}
+		}
+	],
+	"defaultVerbMessage": [{
+		"content": {
+			"text": "I don't understand what you mean by that."
+		}
+	}],
+	"startRoom": "downstairsRoom"
+}

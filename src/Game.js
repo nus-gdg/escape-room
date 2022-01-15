@@ -1,11 +1,10 @@
 "use strict";
 const fs = require('fs');
 const path = require('path');
-const EventEmitter = require('events');
 const readline = require('readline');
 const readlineInterface = readline.createInterface(process.stdin, process.stdout);
 
-const path_data = path.join(__dirname, "Levels");
+const path_data = "Levels";
 
 const msg_welcome = "Welcome!";
 const msg_win = "CONGRATULATIONS!\n\nYou have ESCAPED!";
@@ -13,8 +12,6 @@ const msg_goodbye = "Goodbye!";
 
 const prompt_continue = "Press <ENTER> to continue...";
 const prompt_chooseOption = "What would you like to do?";
-
-const listener = new EventEmitter();
 
 function readDataSync(directory, onFileContent) {
   fs.readdirSync(directory).forEach((filename) => {
@@ -51,6 +48,10 @@ function ask(query = "") {
   return new Promise((resolve, reject) => {
     readlineInterface.question(query, resolve);
   });
+}
+
+function clearLog() {
+  console.clear();
 }
 
 function displayLine(message) {
@@ -114,6 +115,8 @@ function promptChooseOption(state, options) {
 }
 
 async function setup() {
+  clearLog();
+
   loadLevels();
 
   displayLine(msg_welcome);
@@ -121,55 +124,38 @@ async function setup() {
 }
 
 async function teardown() {
+  clearLog();
   displayLine(msg_goodbye);
 }
 
-class GameState {
-  constructor() {
-    this.level = levels.level1;
-    this.currentState = deepcopy(this.level.initialState);
-    this.currentRoom = this.level.rooms[this.level.initialRoom];
-    this.previousRoom = this.level.rooms[this.level.initialRoom]; 
-    this.validOptions = getValidOptions(this.currentState, 
-      this.currentRoom.options);
-  }
-  
-  response(option) {
-    if (this.validOptions.length > 0) {
-      this.previousRoom = this.currentRoom;
-      this.currentRoom = this.level.rooms[option.destination];
-      Object.assign(this.currentState, this.currentRoom.modifies);
-    } else {
-      this.currentRoom = this.previousRoom;
-    }
-    
-    if (this.currentState.escaped) {
-      displayLine(msg_win);
-      return true;
-    }
-    
-    this.validOptions = getValidOptions(this.currentState, 
-      this.currentRoom.options);
-    
-    displayDebug(this.currentState, this.currentRoom);
-    displayLines(this.currentRoom.description);
-    return false;
-  }
-}
-
 async function play() {
-  let game = new GameState();
-  
-  let response = null;
+  let level = levels.level1;
+  let currentState = deepcopy(level.initialState);
+  let currentRoom = level.rooms[level.initialRoom];
+  let previousRoom = level.rooms[level.initialRoom];
+
   while (true) {
-    if (game.validOptions.length > 0) {
-      response = await promptChooseOption(null, game.validOptions);
+    clearLog();
+
+    if (currentState.escaped) {
+      displayLine(msg_win);
+      await promptContinue();
+      return;
+    }
+
+    displayDebug(currentState, currentRoom);
+    displayLines(currentRoom.description);
+
+    const validOptions = getValidOptions(currentState, currentRoom.options);
+
+    if (validOptions.length > 0) {
+      let option = await promptChooseOption(currentState, validOptions);
+      previousRoom = currentRoom;
+      currentRoom = level.rooms[option.destination];
+      Object.assign(currentState, currentRoom.modifies);
     } else {
       await promptContinue();
-      response = null;
-    }
-    if (game.response(response)) {
-      return;
+      currentRoom = previousRoom;
     }
   }
 }
@@ -181,10 +167,4 @@ async function run() {
   process.exit();
 }
 
-
-// To do: add a listener. Hook should add in listeners first
-
-module.exports = {
-  run : run,
-  listener : listener
-};
+run();

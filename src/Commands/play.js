@@ -10,7 +10,6 @@ const setupGame = (client, message, args) => {
     return;
   }
   client.variables.channelList.play.push(message.channel.id);
-  console.log(client.variables.channelList);
   
   let currentValue = 0;
   let messageId = null;

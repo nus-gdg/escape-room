@@ -1,0 +1,116 @@
+
+```json
+ContentObject // what we send to daniel
+{
+  "text": [], // array of decsriptions
+  "image": [], // arrray of url
+  "emoji": ":smile:", // emoji
+  "flags": [
+      "win",
+      "lap"
+  ]
+}
+
+ReactionOption
+{
+  "summary": "open door",
+  "destination": "door_unlocked",
+  "requires": {
+    "foundKey": true,
+	...
+  }
+}
+
+RoomObject
+{
+  "content": ContentObject
+  "modifyFlag": {
+	"foundString": true
+  },
+  "modifyInventory": {
+	"yarn": 1
+  },
+  "reactionOptions": [ // appear as visible options/reactions in discord
+    ReactionOption,
+	...
+  ],
+  "textOptions": [
+    TextOption,
+    ...
+  ]
+}
+
+ItemInfo
+{
+  "content": ContentObject
+}
+
+// use - room
+// combine - inventory
+
+TextOption
+{
+  "desc": "Combine two objects",
+  "regex": "combine (.+), (.+)",
+  "recipes": {
+	"magnet~string": { // alphabetically ascending items conjugated with ~
+	  "requirements": ["magnet", "string"], // array of item keys
+      "feedback": {
+        "content": ContentObject
+      },
+	  "results": [
+		"magnet on a string"
+	  ],
+	  "destination": "newRoom" // nullable
+	}
+  }
+
+    //  "summary": "use key",
+	//  "destination": "door_unlocked",
+	//  "requires": {
+	//    "foundKey": true,
+	//	...
+	//  }
+}
+
+
+TopLevelObject //model of entire game like main.java
+{
+  "initialState": {
+    "foundString": false,
+    "unlockedSafe": false,
+	...
+  },
+  "initialRoom": "main",
+  "rooms": {
+    "roomName": RoomObject,
+	...
+  },
+  "inventory": {
+    "itemName": ItemInfo,
+	...
+  },
+  "globalOptions": {
+    "optionName": TextOption, // key is name of option: "combine"
+	...
+  },
+  "messages": {
+    "invalid": ContentObject
+  }
+}
+
+StateObject
+{
+  "variables": {
+    "currentRoom": "",
+    "globalFlags": {
+      "flag": true,
+      ...
+    },
+    "inventory": {
+      "hammer": 1
+    }
+  }
+}
+```
+

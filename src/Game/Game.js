@@ -15,153 +15,145 @@ function emptyPassagePayload() {
 
 function GameInstance() {
 	this.state = {};
-	this.state.variables = {};
+	this.state.globalFlags = {};
 	
 	// load model
 	let rawdata = fs.readFileSync(arguments[0]);
 	this.model = JSON.parse(rawdata);
 	
 	// set initial room
-	this.state.variables.currentRoom = this.model.startRoom;
+	this.state.currentRoom = this.model.initialRoom;
 	
 	// set initial flags
-	_.forEach(this.model.rooms, (roomValue, roomName) => {
-		this.state.variables[roomName] = {};
-		_.forEach(roomValue.initialFlags, (flagValue, flagName) => {
-			this.state.variables[roomName][flagName] = flagValue;
-		})
+	_.forEach(this.model.initialState, (flagValue, flagName) => {
+		this.state.globalFlags[flagName] = flagValue;
 	});
 	
-	// init inventory
-	this.state.variables.inventory = {};
+	this.state.inventory = {};
 	
-	// functions
-	this.greet = () => {
-		
+	this.start = () => {
+		return printRoom();
 	};
 	
-	// string -> passagePayload
-	this.interact = (input) => {
-		let passageList = {};
+	this.react = (input) => {
+		let reactionObject = _.find(this.model.rooms[this.state.currentRoom].reactionOptions, x => x.emoji === input);
 		
-		let parseResult = Parser.parse(input, this.model.verbs);
-		
-		// if not match verb list
-		if (_.isEmpty(parseResult)){
-			return Passage.resolve(this.model.defaultVerbMessage, this.state.variables[this.state.variables.currentRoom]).payload;
+		if (satisfiesFlagConditions(reactionObject.requiresFlag) && satisfiesItemConditions(reactionObject.requiresItem)) {
+			changeRoom(reactionObject.destination);
 		}
 		
-		// if fail check 
-		if (!Parser.verify(parseResult, this.state.variables.inventory, this.model.rooms[this.state.variables.currentRoom].interactables)) {
-			return Passage.resolve(this.model.verbs[parseResult.verbId].default, this.state.variables[this.state.variables.currentRoom], this.state.variables.inventory).payload;
+		return printRoom();
+	};
+	
+	this.response = (input) => {
+		let matchResult = {};
+		
+		// find in room first
+		_.forEach(this.model.rooms[this.state.currentRoom].textOptions, textOptionObject => {
+			const filter = new RegExp(textOptionObject.regex, "i");
+			const match = input.match(filter);
+			if (match) {
+				let keyId = _.join(match.splice(1), "~");
+				
+				_.forEach(textOptionObject.recipes, (value, key) => {
+					if (key == keyId) {
+						if (satisfiesFlagConditions(value.requiresFlag) && satisfiesItemConditions(value.requiresItem)) {
+							matchResult = value;
+							return false;
+						}
+					}
+				});
+			}
+		});
+		
+		// find global text options
+		_.forEach(this.model.globalOptions, textOptionObject => {
+			const filter = new RegExp(textOptionObject.regex, "i");
+			const match = input.match(filter);
+			if (match) {
+				let keyId = _.join(match.splice(1), "~");
+				console.log(keyId);
+				
+				_.forEach(textOptionObject.recipes, (value, key) => {
+					if (key == keyId) {
+						if (satisfiesFlagConditions(value.requiresFlag) && satisfiesItemConditions(value.requiresItem)) {
+							matchResult = value;
+							return false;
+						}
+					}
+				});
+			}
+		});
+		
+		if (!_.isEmpty(matchResult)) {
+			changeRoom(matchResult.destination);
+			updateFlags(matchResult.modifyFlag);
+			updateInventory(matchResult.modifyInventory);
+			if (!_.isEmpty(matchResult.content)){
+				return appendReactions(matchResult.content);
+			} else {
+				return printRoom();
+			}
+		} else {
+			return appendReactions(this.model.messages.invalid);
+		}
+	};
+	
+	let satisfiesFlagConditions = (conditions) => {
+		if (_.isEmpty(conditions)) {
+			return true;
 		}
 		
-		let foundMatch = false;
-		
-		// inventory 
-		if (parseResult.verb === "inventory") {
-			return listInventory();
-		}
-		
-		// verbs
-		if (parseResult.verb === "list verbs" || parseResult.verb === "help" ) {
-			return listVerbs();
-		}
-		
-		// look around
-		_.forEach(this.model.rooms[this.state.variables.currentRoom], (value, key) => {
-			if (key === parseResult.actor) {
-				foundMatch = true;
-				passageList = this.model.rooms[this.state.variables.currentRoom][key];
+		let condSatisfied = true;
+		_.forEach(conditions, (value, key) => {
+			console.log("key: " +key+ " EXPECTED: " + value+ " GOT: " + this.state.globalFlags[key]);
+			if (this.state.globalFlags[key] !== value) {
+				condSatisfied = false;
 				return false;
 			}
 		});
 		
-		// world interactables
-		_.forEach(this.model.rooms[this.state.variables.currentRoom].interactables, (value, key) => {
-			if (key === parseResult.actee && _.has(value, parseResult.actor)) {
-				foundMatch = true;
-				passageList = this.model.rooms[this.state.variables.currentRoom].interactables[key][parseResult.actor];
+		return condSatisfied;
+	};
+	
+	let satisfiesItemConditions = (conditions) => {
+		if (_.isEmpty(conditions)) {
+			return true;
+		}
+		
+		let condSatisfied = true;
+		_.forEach(conditions, (value, key) => {
+			if (this.state.inventory[key] < value) {
+				condSatisfied = false;
 				return false;
 			}
 		});
 		
-		// items
-		_.forEach(this.state.variables.inventory, (hasItem, key) => {
-			if (key === parseResult.actor && hasItem && _.has(this.model.items[key], parseResult.actee)) {
-				foundMatch = true;
-				passageList = this.model.items[key][parseResult.actee];
-				return false;
-			}
+		return condSatisfied;
+	};
+	
+	let updateFlags = (flags) => {
+		_.forEach(flags, (value, key) => {
+			this.state.globalFlags[key] = value;
 		});
-		
-		const resp = Passage.resolve(foundMatch ? passageList : this.model.verbs[parseResult.verbId].default, this.state.variables[this.state.variables.currentRoom], this.state.variables.inventory);
-		
-		// empty check
-		if (resp.isEmpty) {
-			return Passage.resolve(this.model.verbs[parseResult.verbId].default, this.state.variables[this.state.variables.currentRoom], this.state.variables.inventory).payload;
-		}
-		
-		const payload = resp.payload;
-		
-		// handle any stateChange
-		handleResp(resp);
-		
-		// handle addContentTag
-		const additionalContent = handleAdditionalContent(resp);
-		return combinePayload(payload, additionalContent);
 	};
 	
-	// change state
-	// passageResp -> -
-	let handleResp = (resp) => {
-		if (_.has(resp, "flagChanges")) {
-			_.forEach(resp.flagChanges, (value, key) => {
-				this.state.variables[this.state.variables.currentRoom][key] = value;
-			});
-		}
-		if (_.has(resp, "roomChange") && resp.roomChange) {
-			this.state.variables.currentRoom = resp.roomChange;
-		}
-		if (_.has(resp, "addInventory")) {
-			_.forEach(resp.addInventory, (value) => {
-				this.state.variables.inventory[value] = true;
-			});
-		}
-		if (_.has(resp, "removeInventory")) {
-			_.forEach(resp.removeInventory, (value) => {
-				this.state.variables.inventory[value] = false;
-			});
-		}
+	let updateInventory = (items) => {
+		_.forEach(items, (value, key) => {
+			if (_.isEmpty(this.state.inventory[key])) {
+				this.state.inventory[key] = 0;
+			}
+			
+			this.state.inventory[key] += value;
+		});
 	};
-	
-	// change state
-	// passageResp -> passagePayload
-	let handleAdditionalContent = (resp) => {
-		if (_.has(resp, "addContent") && resp.addContent) {
-			return this.interact(resp.addContent);
-		}
-		
-		return emptyPassagePayload();
-	};
-	
-	// passagePayload, passagePayload -> passagePayload
-	let combinePayload = (pl1, pl2) => {
-		let returnObject = emptyPassagePayload();
-		
-		returnObject.content.text = pl1.content.text + pl2.content.text;
-		returnObject.content.image = pl1.content.image.concat(pl2.content.image);
-		
-		return returnObject;
-	};
-	
 	
 	let listInventory = () => {
 		let returnObject = emptyPassagePayload();
 		
 		returnObject.content.text += "You look in your pockets and see the following: \n"
 		let itemCount = 0;
-		_.forEach(this.state.variables.inventory, (value, key) => {
+		_.forEach(this.state.inventory, (value, key) => {
 			if (value) {
 				itemCount++;
 				returnObject.content.text += "  - " + key + "\n";
@@ -174,17 +166,45 @@ function GameInstance() {
 		return returnObject;
 	};
 	
-	
-	let listVerbs = () => {
-		let returnObject = emptyPassagePayload();
+	let changeRoom = (roomId) => {
+		if (_.isEmpty(roomId)) {
+			return;
+		}
 		
-		returnObject.content.text += "Verbs and words you know: \n"
-		_.forEach(this.model.verbs, (verb) => {
-			returnObject.content.text += "  - " + verb.desc + "\n";
+		this.state.currentRoom = roomId;
+		updateFlags(this.model.rooms[this.state.currentRoom].modifyFlag);
+		updateInventory(this.model.rooms[this.state.currentRoom].modifyInventory);
+	}
+	
+	let printRoom = () => {
+		let resp = _.cloneDeep(this.model.rooms[this.state.currentRoom].content);
+		
+		return appendReactions(resp);
+	}
+	
+	let appendReactions = (content) => {
+		let resp = _.cloneDeep(content);
+		resp.emoji = [];
+		
+		resp.text.push("");
+		_.forEach(this.model.rooms[this.state.currentRoom].reactionOptions, (reactionObject) => {
+			if (!satisfiesFlagConditions(reactionObject.requiresFlag)) {
+				return;
+			}
+			if (!satisfiesItemConditions(reactionObject.requiresItem)) {
+				return;
+			}
+			
+			resp.emoji.push(reactionObject.emoji);
+			resp.text.push(wrapEmoji(reactionObject.emoji) + ": " + reactionObject.summary);
 		});
 		
-		return returnObject;
-	};
+		return resp;
+	}
+	
+	let wrapEmoji = (emoji) => {
+		return ":" + emoji + ":";
+	}
 }
 
 module.exports = GameInstance;

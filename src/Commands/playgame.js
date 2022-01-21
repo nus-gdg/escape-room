@@ -1,3 +1,6 @@
+var Game = require("../Game/Game.js");
+var path = require("path");
+
 const name_to_emoji = require("emoji-name-map");
 const emoji_to_name = {};
 
@@ -7,13 +10,23 @@ for (let key in name_to_emoji.emoji) {
 
 const parseMessages = (contentObject) => {
   let imageUrl = "";
-  if (contentObject.image[0] !== null) {
-    imageUrl = contentObject.image[0];
+  let newMessages = [];
+  
+  if (contentObject.image !== undefined) {
+    if (contentObject.image[0] !== null) {
+      imageUrl = contentObject.image[0];
+    }
   }
+  
+  for (let message of contentObject.text) {
+    let newMessage = message.replace(/<b>|<\/b>/g, "**");
+    newMessages.push(newMessage);
+  }
+  
   return {
     embed: {
       title: "I don't know what to put here",
-      description: contentObject.text.join("\r\n"), 
+      description: newMessages.join("\r\n"), 
       color: 0x0099ff,
       image: {url: imageUrl},
     }
@@ -103,7 +116,7 @@ const setupGame2 = (client, message, args) => {
   
   let currentMessage = null;
   let currentChannel = message.channel.id;
-  let currentGame = new SampleGame();
+  let currentGame = new Game(path.join(__dirname, "../Game/test.json"));
   
   // TODO: remove race conditions, make this thread safe
   // What would happen if someone passes an invalid emoji? 
@@ -112,10 +125,12 @@ const setupGame2 = (client, message, args) => {
     if (currentMessage !== null) {
       currentMessage.reactions.removeAll();
     }*/
-    if (contentObject.flags.includes("stop")) {
-      client.emit("stop", currentChannel, "playgame");
-      message.channel.send(Goodbye);
-      return;
+    if (contentObject.flags !== undefined) {
+      if (contentObject.flags.includes("stop")) {
+        client.emit("stop", currentChannel, "playgame");
+        message.channel.send(Goodbye);
+        return;
+      }
     }
     
     let parsedMessage = parseMessages(contentObject);
@@ -129,21 +144,36 @@ const setupGame2 = (client, message, args) => {
   
   postState(currentGame.start());
 
-  const updateGameState = function(messageReaction, user) {
+  const sendReaction = function(messageReaction, user) {
     if (!user.bot) {
       if (currentMessage.id == messageReaction.message.id) {
-        postState(currentGame.react(":" 
-          + emoji_to_name[messageReaction.emoji.toString()] + ":"));
+        postState(currentGame.react(
+          emoji_to_name[messageReaction.emoji.toString()]));
       }
     }
   }
   
-  client.on("messageReactionAdd", updateGameState);
+  const sendMessage = function(message) {
+    if (!message.author.bot) {
+      if (message.content === "quit") {
+        client.emit("stop", currentChannel, "playgame");
+        message.channel.send(Goodbye);
+        return;
+      }
+      if (message.channel.id == currentChannel) {
+        postState(currentGame.response(message.content));
+      }
+    }
+  }
+  
+  client.on("messageReactionAdd", sendReaction);
+  client.on("message", sendMessage);
   client.on("stop", (channelId, module) => {
     if ((channelId === currentChannel) && (module === "playgame")) {
       client.variables.channelList.playgame.splice(
         client.variables.channelList.playgame.indexOf(channelId), 1);
-      client.removeListener("messageReactionAdd", updateGameState);
+      client.removeListener("messageReactionAdd", sendReaction);
+      client.removeListener("message", sendMessage);
       client.removeListener("stop", arguments.callee);
     }
   });

@@ -1,0 +1,501 @@
+{
+	"initialState": {
+		"foundString": false,
+		"foundMagnet": false,
+		"foundSinkKey": false,
+		"unlockedSafe": false,
+		"unlockedWinDoor": false
+	},
+	"initialRoom": "downstairs",
+	"rooms": {
+		"downstairs": {
+			"content": {
+				"text": [
+					"Here is the downstairs room.",
+					"The rooms's only furnishings are a plain wooden <b>cabinet</b> and a <b>sink</b> on the western wall.",
+					"The front <b>door</b> is closed.",
+					"There appears to be a flight of <b>stairs</b> leading to the second floor."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go upstairs",
+					"destination": "upstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Look at the cabinet",
+					"destination": "cabinet_string",
+					"requiresFlag": {
+						"foundString": false
+					}
+				},
+				{
+					"emoji": "one",
+					"summary": "Look at the cabinet",
+					"destination": "cabinet_nostring",
+					"requiresFlag": {
+						"foundString": true
+					}
+				},
+				{
+					"emoji": "two",
+					"summary": "Look at the sink",
+					"destination": "sink_key",
+					"requiresFlag": {
+						"foundSinkKey": false
+					}
+				},
+				{
+					"emoji": "two",
+					"summary": "Look at the sink",
+					"destination": "sink_nokey",
+					"requiresFlag": {
+						"foundSinkKey": true
+					}
+				},
+				{
+					"emoji": "three",
+					"summary": "Look at the door",
+					"destination": "door_locked",
+					"requiresFlag": {
+						"unlockedWinDoor": false
+					}
+				},
+				{
+					"emoji": "three",
+					"summary": "Look at the door",
+					"destination": "door_unlocked",
+					"requiresFlag": {
+						"unlockedWinDoor": true
+					}
+				}
+			]
+		},
+		"cabinet_string": {
+			"content": {
+				"text": [
+					"The plain wooden cabinet stares back into your soul.",
+					"It might be hiding something from you.",
+					"There is a pile of string in the corner of the cabinet."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "downstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Take the string",
+					"destination": "string_cabinet"
+				}
+			]
+		},
+		"string_cabinet": {
+			"content": {
+				"text": [
+					"You take the string from the cabinet."
+				]
+			},
+			"modifyFlag": {
+				"foundString": true
+			},
+			"modifyInventory": {
+				"string": 1
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "cabinet_nostring"
+				}
+			]
+		},
+		"cabinet_nostring": {
+			"content": {
+				"text": [
+					"The plain wooden cabinet stares back into your soul.",
+					"It has nothing to hide from you."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "downstairs"
+				}
+			]
+		},
+		"sink_key": {
+			"content": {
+				"text": [
+					"The sink is rusted and beyond disrepair.",
+					"You see a faint glint coming from the sink drain."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "downstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Look under sink",
+					"destination": "sink_under"
+				}
+			],
+			"textOptions": [
+				{
+					"desc": "Use",
+					"regex": "use (.+)",
+					"recipes": {
+						"magnet on a string": {
+							"requirements": [
+								"magnet on a string"
+							],
+							"destination": "sink_fish"
+						}
+					}
+				}
+			]
+		},
+		"sink_fish": {
+			"content": {
+				"text": [
+					"You carefully fish out the object that was occasionally glinting.",
+					"It was a iron key!",
+					"As you were picking up the key, you accidentally dropped the magnet on a string down the sink hole.",
+					"How unfortunate."
+				]
+			},
+			"modifyFlag": {
+				"foundSinkKey": true
+			},
+			"modifyInventory": {
+				"sinkKey": 1,
+				"magnet on a string": -1
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "sink_nokey"
+				}
+			]
+		},
+		"sink_nokey": {
+			"content": {
+				"text": [
+					"The sink is rusted and beyond disrepair."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "downstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Look under sink",
+					"destination": "downstairs"
+				}
+			]
+		},
+		"sink_under": {
+			"content": {
+				"text": [
+					"\"19\" seems to be written under the sink in a black marker.",
+					"Upon closer inspection, the second half of the message seems to be rubbed out."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "sink_key",
+					"requiresFlag": {
+						"foundSinkKey": false
+					}
+				},
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "sink_nokey",
+					"requiresFlag": {
+						"foundSinkKey": false
+					}
+				}
+			]
+		},
+		"door_locked": {
+			"content": {
+				"text": [
+					"The door appears to be locked.",
+					"A key is key to unlocking the door."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "downstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Unlock door",
+					"destination": "door_unlocked",
+					"requiresItem": {
+						"sinkKey": 1
+					}
+				}
+			]
+		},
+		"door_unlocked": {
+			"content": {
+				"text": [
+					"The door appears to be unlocked.",
+					"A key is key to unlocking the door."
+				]
+			},
+			"modifyFlag": {
+				"unlockedWinDoor": true
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "downstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Escape the room",
+					"destination": "win"
+				}
+			]
+		},
+		"win": {
+			"content": {
+				"text": [
+					"You escaped the room!"
+				],
+				"flags": [
+					"win"
+				]
+			}
+		},
+		"upstairs": {
+			"content": {
+				"text": [
+					"Here is the upstairs room.",
+					"The room is only decorated with a bare <b>bed</b> and a small <b>safe</b> in the corner of the room.",
+					"Additionally, there is the flight of <b>stairs</b> that you came from."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "one",
+					"summary": "Look at the bed",
+					"destination": "bed"
+				},
+				{
+					"emoji": "two",
+					"summary": "Look at the safe",
+					"destination": "safe_locked",
+					"requiresFlag": {
+						"unlockedSafe": false
+					}
+				},
+				{
+					"emoji": "two",
+					"summary": "Look at the safe",
+					"destination": "safe_unlocked",
+					"requiresFlag": {
+						"unlockedSafe": true
+					}
+				},
+				{
+					"emoji": "three",
+					"summary": "Go downstairs",
+					"destination": "downstairs"
+				}
+			]
+		},
+		"bed": {
+			"content": {
+				"text": [
+					"The bed is neither too hard nor too soft.",
+					"If a little girl were to stumble upon this bed in the woods, it would be just right for her."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "upstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Look under bed",
+					"destination": "bed_under"
+				}
+			]
+		},
+		"bed_under": {
+			"content": {
+				"text": [
+					"There appears to be a message hastily scribbled on the bedframe in red.",
+					"The message reads \"84\".",
+					"The first half of the message seems to be blotted out with more red paint."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "bed"
+				}
+			]
+		},
+		"safe_locked": {
+			"content": {
+				"text": [
+					"The safe is locked.",
+					"It seems that the safe is locked with a 4 digit code."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "upstairs"
+				}
+			],
+			"textOptions": [
+				{
+					"desc": "Enter password",
+					"regex": "(.+)",
+					"recipes": {
+						"1984": {
+							"destination": "safe_unlock"
+						}
+					}
+				}
+			]
+		},
+		"safe_unlock": {
+			"content": {
+				"text": [
+					"You input \"1984\" into the safe and you hear a loud click."
+				]
+			},
+			"modifyFlag": {
+				"unlockedSafe": true
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "safe_unlocked"
+				}
+			]
+		},
+		"safe_unlocked": {
+			"content": {
+				"text": [
+					"The safe is unlocked."
+				]
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "upstairs"
+				},
+				{
+					"emoji": "one",
+					"summary": "Take ring magnet",
+					"destination": "magnet_safe",
+					"requiresFlag": {
+						"foundMagnet": false,
+						"unlockedSafe": true
+					}
+				}
+			]
+		},
+		"magnet_safe": {
+			"content": {
+				"text": [
+					"You take the ring magnet."
+				]
+			},
+			"modifyFlag": {
+				"foundMagnet": true
+			},
+			"modifyInventory": {
+				"magnet": 1
+			},
+			"reactionOptions": [
+				{
+					"emoji": "back",
+					"summary": "Go back",
+					"destination": "safe_unlocked"
+				}
+			]
+		}
+	},
+	"inventory": {
+		"magnet": {
+			"text": [
+				"The ring magnet fits snugly around your finger.",
+				"You could possibly lose this down a drain pipe."
+			]
+		},
+		"string": {
+			"text": [
+				"Some string that was probably used to tie up some DIY project, definitely not used in some obscure computer stuff."
+			]
+		},
+		"magnet on a string": {
+			"text": [
+				"You tied a magnet to a piece of yarn. You can probably catch some magnetic fish with this, if they exist."
+			]
+		}
+	},
+	"globalOptions": {
+		"combine": {
+			"desc": "Combine two objects",
+			"regex": "combine (.+), (.+)",
+			"recipes": {
+				"magnet~string": {
+					"requirements": [
+						"magnet",
+						"string"
+					],
+					"content": {
+						"text": [
+							"You carefully tie the string around the magnet, making a magnet on a string."
+						]
+					},
+					"modifyInventory": {
+						"magnet": -1,
+						"string": -1,
+						"magnet on a string": 1
+					}
+				}
+			}
+		}
+	},
+	"messages": {
+		"invalid": {
+			"text": [
+				"I don't know what that or what that combination means.",
+				"Perhaps the things you are trying to use simply aren't intended to interact in that way."
+			]
+		}
+	}
+}

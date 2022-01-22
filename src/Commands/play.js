@@ -1,6 +1,6 @@
 var Game = require("../Game/Game.js");
 var path = require("path");
-var { MessageButton, MessageActionRow } = require("discord.js");
+var { MessageButton, MessageActionRow, MessageEmbed } = require("discord.js");
 
 const name_to_emoji = require("emoji-name-map");
 const emoji_to_name = {};
@@ -24,26 +24,27 @@ const parseMessages = (contentObject) => {
     newMessages.push(newMessage);
   }
   
+  let embed = new MessageEmbed();
+  embed.setTitle("I don't know what to put here");
+  if (imageUrl !== "") {
+    embed.setImage(imageUrl);
+  }
+  embed.setDescription(newMessages.join("\r\n"));
+  embed.setColor(0x0099ff);
+  
   let buttonList = new MessageActionRow();
   for (let emoji of contentObject.emoji) {
     buttonList.addComponents(
       new MessageButton()
         .setCustomId(emoji)
         .setStyle("PRIMARY")
-        .setLabel(name_to_emoji.get(emoji))
+        .setEmoji(name_to_emoji.get(emoji))
     );
   }
   
-  return "Nya!";
-  
   return {
-    embed: {
-      title: "I don't know what to put here",
-      description: newMessages.join("\r\n"), 
-      color: 0x0099ff,
-      image: {url: imageUrl},
-    },
-    component: buttonList
+    embeds: [embed], 
+    components: [buttonList]
   }
 }
 
@@ -107,13 +108,14 @@ class SampleGame {
 }
 
 const Goodbye = {
-  embed: {
-    title: "Sayonyara~ :cat:",
-    description: "Hope to see you soon!", 
-    color: 0xffffff,
-    image: {url: "https://i.imgur.com/DKT4tjt.gif"}
-  }
-}
+  embeds: [
+    new MessageEmbed()
+      .setTitle("Sayonyara~ :cat:")
+      .setImage("https://i.imgur.com/DKT4tjt.gif")
+      .setDescription("Hope to see you soon!")
+      .setColor(0xffffff)
+  ]
+};
 
 // In JavaScript, classes are closures. Thus, setupGame 
 // can be seen as a class. 
@@ -154,12 +156,11 @@ const setupGame2 = (client, message, args) => {
   }
   postState(currentGame.start());
 
-  const sendReaction = function(messageReaction, user) {
-    if (!user.bot) {
-      if (currentMessage.id == messageReaction.message.id) {
-        postState(currentGame.react(
-          emoji_to_name[messageReaction.emoji.toString()]));
-      }
+  const sendReaction = async function(interaction) {
+    if (interaction.type !== "MESSAGE_COMPONENT") return;
+    if (currentMessage.id === interaction.message.id) {
+      postState(currentGame.react(interaction.customId));
+      interaction.deferUpdate();
     }
   }
   
@@ -167,9 +168,7 @@ const setupGame2 = (client, message, args) => {
     if (message.reference === null) {
       return;
     }
-    console.log(currentMessage);
-    console.log(message.reference.messageID);
-    if (message.reference.messageID !== currentMessage) {
+    if (message.reference.messageId !== currentMessage.id) {
       return;
     }
     
@@ -185,13 +184,13 @@ const setupGame2 = (client, message, args) => {
     }
   }
   
-  client.on("messageReactionAdd", sendReaction);
+  client.on("interactionCreate", sendReaction);
   client.on("message", sendMessage);
   client.on("stop", (channelId, module) => {
     if ((channelId === currentChannel) && (module === "playgame")) {
       client.variables.channelList.playgame.splice(
         client.variables.channelList.playgame.indexOf(channelId), 1);
-      client.removeListener("messageReactionAdd", sendReaction);
+      client.removeListener("interactionCreate", sendReaction);
       client.removeListener("message", sendMessage);
       client.removeListener("stop", arguments.callee);
     }

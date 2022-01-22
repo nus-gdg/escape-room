@@ -1,8 +1,6 @@
 module.exports = (client, message) => {
   const args = message.content.split(" ");
 
-  message.member.checkRoles();
-
   if (message.author.bot) return;
 
   let commandHandlerCheck = client.config.prefixSeperated
@@ -10,7 +8,7 @@ module.exports = (client, message) => {
     : !message.content.startsWith(client.config.prefix.toLowerCase());
   if (commandHandlerCheck) return;
   
-  if (!message.channel.is.approved) {
+  if (!client.channelIs(message.channel.id, "approved")) {
     return;
   }
 

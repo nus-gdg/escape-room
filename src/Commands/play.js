@@ -1,5 +1,6 @@
 var Game = require("../Game/Game.js");
 var path = require("path");
+var { MessageButton, MessageActionRow } = require("discord.js");
 
 const name_to_emoji = require("emoji-name-map");
 const emoji_to_name = {};
@@ -23,13 +24,26 @@ const parseMessages = (contentObject) => {
     newMessages.push(newMessage);
   }
   
+  let buttonList = new MessageActionRow();
+  for (let emoji of contentObject.emoji) {
+    buttonList.addComponents(
+      new MessageButton()
+        .setCustomId(emoji)
+        .setStyle("PRIMARY")
+        .setLabel(name_to_emoji.get(emoji))
+    );
+  }
+  
+  return "Nya!";
+  
   return {
     embed: {
       title: "I don't know what to put here",
       description: newMessages.join("\r\n"), 
       color: 0x0099ff,
       image: {url: imageUrl},
-    }
+    },
+    component: buttonList
   }
 }
 
@@ -136,12 +150,8 @@ const setupGame2 = (client, message, args) => {
     let parsedMessage = parseMessages(contentObject);
     message.channel.send(parsedMessage).then((sent) => {
       currentMessage = sent;
-      for (let emoji of contentObject.emoji) {
-        sent.react(name_to_emoji.get(emoji));
-      }
     });
   }
-  
   postState(currentGame.start());
 
   const sendReaction = function(messageReaction, user) {

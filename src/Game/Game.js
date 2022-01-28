@@ -7,7 +7,8 @@ var Passage = require("./PassageResolver.js");
 function emptyPassagePayload() {
 	return {
 		content: {
-			"text": "",
+			"title": "",
+			"text": [],
 			"image": []
 		}
 	};
@@ -18,7 +19,12 @@ function GameInstance() {
 	this.state.globalFlags = {};
 	
 	// load model
-	let rawdata = fs.readFileSync(arguments[0]);
+	let rawdata;
+	try {
+		rawdata = fs.readFileSync(arguments[0]);
+	} catch (err) {
+		return err;
+	}
 	this.model = JSON.parse(rawdata);
 	
 	// set initial room
@@ -71,8 +77,7 @@ function GameInstance() {
 			const filter = new RegExp(textOptionObject.regex, "i");
 			const match = input.match(filter);
 			if (match) {
-				let keyId = _.join(match.splice(1), "~");
-				console.log(keyId);
+				let keyId = _.join(_.orderBy(match.splice(1), x => x.toLowerCase()), "~");
 				
 				_.forEach(textOptionObject.recipes, (value, key) => {
 					if (key == keyId) {
@@ -99,6 +104,29 @@ function GameInstance() {
 		}
 	};
 	
+	this.saveState = () => {
+		return this.state;
+	};
+	
+	this.saveStateToFile = (fileDir, errorFunction) => {
+		fs.writeFile(fileDir, JSON.stringify(this.state, null, 2), errorFunction);
+	};
+	
+	this.loadState = (newState) => {
+		this.state = newState;
+	};
+	
+	this.loadStateFromFile = (fileDir) => {
+		let rawdata;
+		try {
+			rawdata = fs.readFileSync(fileDir);
+		} catch (err) {
+			return err;
+		}
+		this.state = JSON.parse(rawdata);
+		return true;
+	};
+	
 	let satisfiesFlagConditions = (conditions) => {
 		if (_.isEmpty(conditions)) {
 			return true;
@@ -106,7 +134,6 @@ function GameInstance() {
 		
 		let condSatisfied = true;
 		_.forEach(conditions, (value, key) => {
-			console.log("key: " +key+ " EXPECTED: " + value+ " GOT: " + this.state.globalFlags[key]);
 			if (this.state.globalFlags[key] !== value) {
 				condSatisfied = false;
 				return false;

@@ -25,7 +25,7 @@ const parseMessages = (contentObject) => {
   }
   
   let embed = new MessageEmbed();
-  embed.setTitle("I don't know what to put here");
+  embed.setTitle(contentObject.title);
   if (imageUrl !== "") {
     embed.setImage(imageUrl);
   }
@@ -45,65 +45,6 @@ const parseMessages = (contentObject) => {
   return {
     embeds: [embed], 
     components: [buttonList]
-  }
-}
-
-class SampleGame {
-  constructor() {
-    this.currentValue = 0;
-  }
-  
-  start() {
-    this.currentValue = 0;
-    return {
-      "text": ["Welcome!", 
-        "Current State: " + this.currentValue,
-        "",
-        ":arrow_left: decrease by 1",
-        ":arrow_right: increase by 1", 
-        ":x: exit"], // array of decsriptions
-      "image": [], // arrray of url
-      "emoji": [
-        ":arrow_left:",
-        ":arrow_right:",
-        ":x:"
-      ], // emoji, for reactions
-      "flags": [""]
-    }
-  }
-  
-  response(text) {
-  }
-
-  react(emoji) {
-    let hasStopped = "";
-    switch (emoji) {
-      case ":arrow_left:":
-        this.currentValue--;
-        break;
-      case ":arrow_right:":
-        this.currentValue++;
-        break;
-      case ":x:":
-        hasStopped = "stop";
-        break;
-      default:
-        break;
-    }
-    return {
-      "text": ["Current State: " + this.currentValue,
-        "",
-        ":arrow_left: decrease by 1",
-        ":arrow_right: increase by 1", 
-        ":x: exit"], // array of decsriptions
-      "image": [], // arrray of url
-      "emoji": [
-        ":arrow_left:",
-        ":arrow_right:",
-        ":x:"
-      ], // emoji, for reactions
-      "flags": [hasStopped]
-    }
   }
 }
 
@@ -135,12 +76,7 @@ const setupGame2 = (client, message, args) => {
   let currentGame = new Game(path.join(__dirname, "../Game/test.json"));
   
   // TODO: remove race conditions, make this thread safe
-  // What would happen if someone passes an invalid emoji? 
   const postState = (contentObject) => {
-    /*
-    if (currentMessage !== null) {
-      currentMessage.reactions.removeAll();
-    }*/
     if (contentObject.flags !== undefined) {
       if (contentObject.flags.includes("stop")) {
         client.emit("stop", currentChannel, "playgame");

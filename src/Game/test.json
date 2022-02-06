@@ -10,11 +10,15 @@
 	"rooms": {
 		"downstairs": {
 			"content": {
+				"title": "An empty room",
 				"text": [
 					"Here is the downstairs room.",
 					"The rooms's only furnishings are a plain wooden <b>cabinet</b> and a <b>sink</b> on the western wall.",
 					"The front <b>door</b> is closed.",
 					"There appears to be a flight of <b>stairs</b> leading to the second floor."
+				],
+				"image": [
+					"https://i.imgur.com/UZ2vSz6.jpeg"
 				]
 			},
 			"reactionOptions": [
@@ -75,6 +79,7 @@
 		},
 		"cabinet_string": {
 			"content": {
+				"title": "A suspicious cabinet",
 				"text": [
 					"The plain wooden cabinet stares back into your soul.",
 					"It might be hiding something from you.",
@@ -96,6 +101,7 @@
 		},
 		"string_cabinet": {
 			"content": {
+				"title": "A suspicious cabinet",
 				"text": [
 					"You take the string from the cabinet."
 				]
@@ -116,6 +122,7 @@
 		},
 		"cabinet_nostring": {
 			"content": {
+				"title": "A suspicious cabinet",
 				"text": [
 					"The plain wooden cabinet stares back into your soul.",
 					"It has nothing to hide from you."
@@ -131,6 +138,7 @@
 		},
 		"sink_key": {
 			"content": {
+				"title": "An disused sink",
 				"text": [
 					"The sink is rusted and beyond disrepair.",
 					"You see a faint glint coming from the sink drain."
@@ -165,6 +173,7 @@
 		},
 		"sink_fish": {
 			"content": {
+				"title": "An disused sink",
 				"text": [
 					"You carefully fish out the object that was occasionally glinting.",
 					"It was a iron key!",
@@ -189,6 +198,7 @@
 		},
 		"sink_nokey": {
 			"content": {
+				"title": "An disused sink",
 				"text": [
 					"The sink is rusted and beyond disrepair."
 				]
@@ -208,6 +218,7 @@
 		},
 		"sink_under": {
 			"content": {
+				"title": "An disused sink",
 				"text": [
 					"\"19\" seems to be written under the sink in a black marker.",
 					"Upon closer inspection, the second half of the message seems to be rubbed out."
@@ -234,6 +245,7 @@
 		},
 		"door_locked": {
 			"content": {
+				"title": "A wooden door",
 				"text": [
 					"The door appears to be locked.",
 					"A key is key to unlocking the door."
@@ -257,6 +269,7 @@
 		},
 		"door_unlocked": {
 			"content": {
+				"title": "A wooden door",
 				"text": [
 					"The door appears to be unlocked.",
 					"A key is key to unlocking the door."
@@ -280,6 +293,7 @@
 		},
 		"win": {
 			"content": {
+				"title": "Victory?!",
 				"text": [
 					"You escaped the room!"
 				],
@@ -290,10 +304,16 @@
 		},
 		"upstairs": {
 			"content": {
+				"title": "A similarly empty room",
 				"text": [
 					"Here is the upstairs room.",
 					"The room is only decorated with a bare <b>bed</b> and a small <b>safe</b> in the corner of the room.",
 					"Additionally, there is the flight of <b>stairs</b> that you came from."
+				],
+				"image": [
+					"https://i.imgur.com/QSwRXjR.jpeg",
+					"https://i.imgur.com/GJtnyCW.jpeg"
+					
 				]
 			},
 			"reactionOptions": [
@@ -327,6 +347,7 @@
 		},
 		"bed": {
 			"content": {
+				"title": "A bed of intermediate softness",
 				"text": [
 					"The bed is neither too hard nor too soft.",
 					"If a little girl were to stumble upon this bed in the woods, it would be just right for her."
@@ -347,6 +368,7 @@
 		},
 		"bed_under": {
 			"content": {
+				"title": "A bed of intermediate softness",
 				"text": [
 					"There appears to be a message hastily scribbled on the bedframe in red.",
 					"The message reads \"84\".",
@@ -389,6 +411,7 @@
 		},
 		"safe_unlock": {
 			"content": {
+				"title": "A safe of questionable safeness",
 				"text": [
 					"You input \"1984\" into the safe and you hear a loud click."
 				]
@@ -406,6 +429,7 @@
 		},
 		"safe_unlocked": {
 			"content": {
+				"title": "A safe of questionable safeness",
 				"text": [
 					"The safe is unlocked."
 				]
@@ -429,6 +453,7 @@
 		},
 		"magnet_safe": {
 			"content": {
+				"title": "A safe of questionable safeness",
 				"text": [
 					"You take the ring magnet."
 				]
@@ -477,6 +502,7 @@
 						"string"
 					],
 					"content": {
+						"title": "A stroke of genius",
 						"text": [
 							"You carefully tie the string around the magnet, making a magnet on a string."
 						]

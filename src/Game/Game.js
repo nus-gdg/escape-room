@@ -114,6 +114,7 @@ function GameInstance() {
 	
 	this.loadState = (newState) => {
 		this.state = newState;
+    return printRoom();
 	};
 	
 	this.loadStateFromFile = (fileDir) => {
@@ -124,7 +125,7 @@ function GameInstance() {
 			return err;
 		}
 		this.state = JSON.parse(rawdata);
-		return true;
+		return printRoom();
 	};
 	
 	let satisfiesFlagConditions = (conditions) => {

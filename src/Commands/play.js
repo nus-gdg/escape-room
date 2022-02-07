@@ -90,12 +90,23 @@ const setupGame2 = (client, message, args) => {
       currentMessage = sent;
     });
   }
-  postState(currentGame.start());
+  
+  const getFilePath = () => {
+    return "savedata/" + currentChannel + ".json";
+  }
+  
+  try {
+    postState(currentGame.loadStateFromFile(getFilePath()));
+  } catch (err) {
+    postState(currentGame.start());
+  }
 
   const sendReaction = async function(interaction) {
     if (interaction.type !== "MESSAGE_COMPONENT") return;
     if (currentMessage.id === interaction.message.id) {
       postState(currentGame.react(interaction.customId));
+      currentGame.saveStateToFile(getFilePath(), 
+        (e) => {console.log(e)});
       interaction.deferUpdate();
     }
   }
@@ -116,6 +127,8 @@ const setupGame2 = (client, message, args) => {
       }
       if (message.channel.id == currentChannel) {
         postState(currentGame.response(message.content));
+        currentGame.saveStateToFile(getFilePath(), 
+          (e) => {console.log(e)});
       }
     }
   }

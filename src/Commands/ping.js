@@ -2,12 +2,12 @@ module.exports = {
   commands: [
     {
       command: "ping",
-      example: "!ping",
-      description: "Displays the latency of the bot."
+      example: "nyan! ping",
+      description: "Displays the current state of the bot."
     }
   ],
 
   run: (client, message) => {
-    message.channel.send("Pong!");
+    message.channel.send("Hello nya!");
   }
 };

@@ -1,0 +1,26 @@
+var Game = require("./Game.js");
+
+let gameInstance = new Game("test.json");
+console.log(gameInstance.start());
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("two"));
+console.log(gameInstance.response("1999"));
+console.log(gameInstance.response("1984"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("one"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("three"));
+console.log(gameInstance.react("one"));
+console.log(gameInstance.react("one"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("two"));
+console.log(gameInstance.response("combine string, magnet"));
+console.log(gameInstance.response("use magnet on a string"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("back"));
+console.log(gameInstance.react("three"));
+console.log(gameInstance.react("one"));
+console.log(gameInstance.react("one"));
+console.log(gameInstance.saveStateToFile("asdf.json", err => console.log(err)));

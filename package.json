@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^2.4.2",
-    "discord.js": "^12.3.1",
+    "discord.js": "^13.6.0",
+    "emoji-name-map": "^1.2.9",
     "fs": "0.0.1-security",
     "mysql2": "^1.7.0",
     "sequelize": "^5.22.3",
@@ -21,7 +22,7 @@
   },
   "devDependencies": {
     "mysql": "^2.18.1",
-    "nodemon": "^1.19.4",
+    "nodemon": "^2.0.15",
     "sequelize-auto": "^0.5.4"
   }
 }

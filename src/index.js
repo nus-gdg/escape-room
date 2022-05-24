@@ -6,10 +6,24 @@ async function start() {
   const log = console.log;
 
   class DiscordBot extends Discord.Client {
-    constructor() {
-      super();
+    constructor(options) {
+      super(options);
 
       this.config = require("../config");
+      this.variables = {};
+      this.variables.channelList = {};
+      
+      this.channelIs = (channel, id) => {
+        if (this.config.channels.hasOwnProperty(id)) {
+          if (typeof this.config.channels[id] === "string") {
+            return this.config.channels[id] === channel;
+          } else if (Array.isArray(this.config.channels[id])) {
+            return this.config.channels[id].includes(channel);
+          }
+        }
+        return false;
+      };
+      
       this.loadLogs();
       this.loadEvents();
       this.loadCommands();
@@ -108,7 +122,9 @@ async function start() {
     }
   }
 
-  const client = new DiscordBot();
+  const client = new DiscordBot({
+    intents:["GUILDS", "GUILD_MESSAGES"]
+  });
   module.exports = client;
   require("./validation");
 

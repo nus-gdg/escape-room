@@ -1,0 +1,11 @@
+{
+  "globalFlags": {
+    "foundString": false,
+    "foundMagnet": false,
+    "foundSinkKey": false,
+    "unlockedSafe": false,
+    "unlockedWinDoor": false
+  },
+  "currentRoom": "sink_key",
+  "inventory": {}
+}

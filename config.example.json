@@ -1,13 +1,16 @@
 {
-  "name": "Discord.JS Boilerplate",
-  "botToken": "xxx",
-  "prefix": "!",
-  "prefixSeperated": false,
+  "name": "Testing Bot",
+  "botToken": "your token here!",
+  "prefix": "nyan!",
+  "prefixSeperated": true,
   "channels": {
-    "general": "1234"
+    "approved": ["853572801594916874",
+                 "742679158093643828",
+                 "928666008061882429"
+                ]
   },
   "roles": {
-    "admin": "1234"
+    "admin": "42069"
   },
   "logChannel": null,
   "database": {

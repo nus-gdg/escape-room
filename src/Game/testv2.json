@@ -433,7 +433,7 @@
 	},
 	"inventory": {
 		"magnet": {
-			"passages": [
+			"passage": [
 				{
 					"text": [
 						"The ring magnet fits snugly around your finger.",
@@ -443,7 +443,7 @@
 			]
 		},
 		"string": {
-			"passages": [
+			"passage": [
 				{
 					"text": [
 						"Some string that was probably used to tie up some DIY project, definitely not used in some obscure computer stuff."
@@ -452,7 +452,7 @@
 			]
 		},
 		"magnet on a string": {
-			"passages": [
+			"passage": [
 				{
 					"text": [
 						"You tied a magnet to a piece of yarn. You can probably catch some magnetic fish with this, if they exist."

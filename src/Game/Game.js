@@ -1,16 +1,14 @@
 var _ = require('lodash'); 
 var fs = require('fs');
 
-var Parser = require("./CommandParser.js");
+var Parser = require("./ConditionParser.js");
 var Passage = require("./PassageResolver.js");
 
 function emptyPassagePayload() {
 	return {
-		content: {
-			"title": "",
-			"text": [],
-			"image": []
-		}
+		"title": "",
+		"text": [],
+		"image": []
 	};
 }
 
@@ -42,20 +40,33 @@ function GameInstance() {
 	};
 	
 	this.react = (input) => {
-		let reactionObject = _.find(this.model.rooms[this.state.currentRoom].reactionOptions, x => x.emoji === input);
+		let passages = Passage.resolve(this.model.rooms[this.state.currentRoom].passages, this.state.globalFlags, this.state.inventory);
+		let reacts = _.find(passages.reactionOptions, x => x.emoji === input);
 		
-		if (satisfiesFlagConditions(reactionObject.requiresFlag) && satisfiesItemConditions(reactionObject.requiresItem)) {
-			changeRoom(reactionObject.destination);
+		handleModifies(reacts.modify);
+		
+		if (reacts.destination) {
+			changeRoom(reacts.destination);
 		}
 		
-		return printRoom();
+		let prependPassage = [];
+		if (!_.isEmpty(reacts.prepend)) {
+			prependPassage = reacts.prepend;
+		}
+		return printRoom(prependPassage);
 	};
 	
 	this.response = (input) => {
+		if (input === "inventory") {
+			return printRoom(listInventory());
+		}
+		
 		let matchResult = {};
 		
+		let passages = Passage.resolve(this.model.rooms[this.state.currentRoom].passages, this.state.globalFlags, this.state.inventory);
+		
 		// find in room first
-		_.forEach(this.model.rooms[this.state.currentRoom].textOptions, textOptionObject => {
+		_.forEach(passages.textOptions, textOptionObject => {
 			const filter = new RegExp(textOptionObject.regex, "i");
 			const match = input.match(filter);
 			if (match) {
@@ -63,7 +74,7 @@ function GameInstance() {
 				
 				_.forEach(textOptionObject.recipes, (value, key) => {
 					if (key == keyId) {
-						if (satisfiesFlagConditions(value.requiresFlag) && satisfiesItemConditions(value.requiresItem)) {
+						if (Parser.parse(value.condition, this.state.globalFlags, this.state.inventory)) {
 							matchResult = value;
 							return false;
 						}
@@ -73,7 +84,7 @@ function GameInstance() {
 		});
 		
 		// find global text options
-		_.forEach(this.model.globalOptions, textOptionObject => {
+		_.forEach(this.model.globalTextOptions, textOptionObject => {
 			const filter = new RegExp(textOptionObject.regex, "i");
 			const match = input.match(filter);
 			if (match) {
@@ -81,7 +92,7 @@ function GameInstance() {
 				
 				_.forEach(textOptionObject.recipes, (value, key) => {
 					if (key == keyId) {
-						if (satisfiesFlagConditions(value.requiresFlag) && satisfiesItemConditions(value.requiresItem)) {
+						if (Parser.parse(value.condition, this.state.globalFlags, this.state.inventory)) {
 							matchResult = value;
 							return false;
 						}
@@ -92,15 +103,20 @@ function GameInstance() {
 		
 		if (!_.isEmpty(matchResult)) {
 			changeRoom(matchResult.destination);
-			updateFlags(matchResult.modifyFlag);
-			updateInventory(matchResult.modifyInventory);
-			if (!_.isEmpty(matchResult.content)){
-				return appendReactions(matchResult.content);
-			} else {
-				return printRoom();
+			handleModifies(matchResult.modify);
+			
+			if (matchResult.destination) {
+				changeRoom(matchResult.destination);
 			}
+			
+			let prependPassage = [];
+			if (matchResult.prepend) {
+				prependPassage = matchResult.prepend;
+			}
+			
+			return printRoom(prependPassage);
 		} else {
-			return appendReactions(this.model.messages.invalid);
+			return printRoom(this.model.messages.invalid);
 		}
 	};
 	
@@ -114,7 +130,7 @@ function GameInstance() {
 	
 	this.loadState = (newState) => {
 		this.state = newState;
-    return printRoom();
+		return printRoom();
 	};
 	
 	this.loadStateFromFile = (fileDir) => {
@@ -128,37 +144,18 @@ function GameInstance() {
 		return printRoom();
 	};
 	
-	let satisfiesFlagConditions = (conditions) => {
-		if (_.isEmpty(conditions)) {
-			return true;
-		}
-		
-		let condSatisfied = true;
-		_.forEach(conditions, (value, key) => {
-			if (this.state.globalFlags[key] !== value) {
-				condSatisfied = false;
-				return false;
-			}
-		});
-		
-		return condSatisfied;
+	this.resetSaveFile = (fileDir) => {
+		fs.unlinkSync(fileDir);
 	};
 	
-	let satisfiesItemConditions = (conditions) => {
-		if (_.isEmpty(conditions)) {
-			return true;
+	let handleModifies = (modify) => {
+		if (_.isEmpty(modify)) {
+			return;
 		}
 		
-		let condSatisfied = true;
-		_.forEach(conditions, (value, key) => {
-			if (this.state.inventory[key] < value) {
-				condSatisfied = false;
-				return false;
-			}
-		});
-		
-		return condSatisfied;
-	};
+		updateFlags(modify.modifyFlag);
+		updateInventory(modify.modifyInventory);
+	}
 	
 	let updateFlags = (flags) => {
 		_.forEach(flags, (value, key) => {
@@ -168,7 +165,7 @@ function GameInstance() {
 	
 	let updateInventory = (items) => {
 		_.forEach(items, (value, key) => {
-			if (_.isEmpty(this.state.inventory[key])) {
+			if (typeof this.state.inventory[key] !== "number") {
 				this.state.inventory[key] = 0;
 			}
 			
@@ -177,18 +174,21 @@ function GameInstance() {
 	};
 	
 	let listInventory = () => {
-		let returnObject = emptyPassagePayload();
+		let returnObject = [];
+		let passageZero = {};
+		passageZero.text = []
+		returnObject.push(passageZero);
 		
-		returnObject.content.text += "You look in your pockets and see the following: \n"
+		passageZero.text.push("You look in your pockets and see the following:");
 		let itemCount = 0;
 		_.forEach(this.state.inventory, (value, key) => {
-			if (value) {
+			if (value > 0) {
 				itemCount++;
-				returnObject.content.text += "  - " + key + "\n";
+				passageZero.text.push(`  - ${key}: ${value}`);
 			}
 		});
 		if (itemCount === 0) {
-			returnObject.content.text += "  - a whole lot of nothing\n"
+			passageZero.text.push("  - a whole lot of nothing");
 		}
 		
 		return returnObject;
@@ -200,34 +200,34 @@ function GameInstance() {
 		}
 		
 		this.state.currentRoom = roomId;
-		updateFlags(this.model.rooms[this.state.currentRoom].modifyFlag);
-		updateInventory(this.model.rooms[this.state.currentRoom].modifyInventory);
+		handleModifies(this.model.rooms[this.state.currentRoom].modify);
 	}
 	
-	let printRoom = () => {
-		let resp = _.cloneDeep(this.model.rooms[this.state.currentRoom].content);
+	let printRoom = (prependPassage) => {
+		let appendReactions = (r) => {
+			let resp = _.cloneDeep(r);
+			resp.emoji = [];
+			
+			resp.text.push("");
+			_.forEach(passages.reactionOptions, (reactionObject) => {
+				resp.emoji.push(reactionObject.emoji);
+				resp.text.push(wrapEmoji(reactionObject.emoji) + ": " + reactionObject.summary);
+			});
+			
+			return resp;
+		}
+		
+		let resp = emptyPassagePayload();
+		
+		let passages = Passage.resolve(this.model.rooms[this.state.currentRoom].passages, this.state.globalFlags, this.state.inventory);
+		
+		let prepend = Passage.resolve(prependPassage, this.state.globalFlags, this.state.inventory);
+		
+		resp.title = this.model.rooms[this.state.currentRoom].title;
+		resp.text = _.isEmpty(prependPassage) ? passages.text : prepend.text.concat("", passages.text);
+		resp.image = passages.image;
 		
 		return appendReactions(resp);
-	}
-	
-	let appendReactions = (content) => {
-		let resp = _.cloneDeep(content);
-		resp.emoji = [];
-		
-		resp.text.push("");
-		_.forEach(this.model.rooms[this.state.currentRoom].reactionOptions, (reactionObject) => {
-			if (!satisfiesFlagConditions(reactionObject.requiresFlag)) {
-				return;
-			}
-			if (!satisfiesItemConditions(reactionObject.requiresItem)) {
-				return;
-			}
-			
-			resp.emoji.push(reactionObject.emoji);
-			resp.text.push(wrapEmoji(reactionObject.emoji) + ": " + reactionObject.summary);
-		});
-		
-		return resp;
 	}
 	
 	let wrapEmoji = (emoji) => {

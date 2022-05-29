@@ -1,6 +1,6 @@
 var Game = require("./Game.js");
 
-let gameInstance = new Game("test.json");
+let gameInstance = new Game("testv2.json");
 console.log(gameInstance.start());
 console.log(gameInstance.react("back"));
 console.log(gameInstance.react("two"));

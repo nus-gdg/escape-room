@@ -73,7 +73,7 @@ const setupGame2 = (client, message, args) => {
   
   let currentMessage = null;
   let currentChannel = message.channel.id;
-  let currentGame = new Game(path.join(__dirname, "../Game/test.json"));
+  let currentGame = new Game(path.join(__dirname, "../Game/testv2.json"));
   
   // TODO: remove race conditions, make this thread safe
   const postState = (contentObject) => {
@@ -112,15 +112,17 @@ const setupGame2 = (client, message, args) => {
   }
   
   const sendMessage = function(message) {
-    if (message.reference === null) {
-      return;
-    }
-    if (message.reference.messageId !== currentMessage.id) {
-      return;
-    }
-    
     if (!message.author.bot) {
+	  if (message.content.startsWith(client.config.prefix)) {
+		return;
+	  }
       if (message.content === "quit") {
+        client.emit("stop", currentChannel, "playgame");
+        message.channel.send(Goodbye);
+        return;
+      }
+      if (message.content === "really reset") {
+		currentGame.resetSaveFile(getFilePath());
         client.emit("stop", currentChannel, "playgame");
         message.channel.send(Goodbye);
         return;
@@ -134,13 +136,13 @@ const setupGame2 = (client, message, args) => {
   }
   
   client.on("interactionCreate", sendReaction);
-  client.on("message", sendMessage);
+  client.on("messageCreate", sendMessage);
   client.on("stop", (channelId, module) => {
     if ((channelId === currentChannel) && (module === "playgame")) {
       client.variables.channelList.playgame.splice(
         client.variables.channelList.playgame.indexOf(channelId), 1);
       client.removeListener("interactionCreate", sendReaction);
-      client.removeListener("message", sendMessage);
+      client.removeListener("messageCreate", sendMessage);
       client.removeListener("stop", arguments.callee);
     }
   });
